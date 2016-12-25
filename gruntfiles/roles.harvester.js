@@ -17,7 +17,7 @@ module.exports.loop = function (creep) {
     }
     else {
         target = Game.getObjectById(creep.memory.targetId);
-        if (source === target) {
+        if (target === null) {
             creep.memory.targetId = null;
         }
     }
@@ -25,7 +25,7 @@ module.exports.loop = function (creep) {
     /**
      * If creep can carry more energy and is not near another target, go harvest closest resource
      */
-    if (creep.carry.energy < creep.carryCapacity && !(creep.carry.energy >= 50 && creep.pos.inRangeTo(target, 3))) {
+    if (creep.carry.energy < creep.carryCapacity && !(target && creep.carry.energy >= 50 && creep.pos.inRangeTo(target, 3))) {
         var source;
         if (!creep.memory.sourceId) {
             source = findClosestSource(creep);

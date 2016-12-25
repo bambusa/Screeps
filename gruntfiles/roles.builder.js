@@ -24,7 +24,7 @@ module.exports.loop = function (creep) {
         }
         else {
             target = Game.getObjectById(creep.memory.targetId);
-            if (source === target) {
+            if (target === null) {
                 creep.memory.targetId = null;
             }
         }

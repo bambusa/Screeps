@@ -24,7 +24,7 @@ module.exports.loop = function (creep) {
         }
         else {
             target = Game.getObjectById(creep.memory.targetId);
-            if (source === target) {
+            if (target === null) {
                 creep.memory.targetId = null;
             }
         }
@@ -114,13 +114,13 @@ module.exports.findClosestSource = findClosestSource;
 var findClosestTarget = function (creep) {
     var target = creep.pos.findClosestByRange(FIND_STRUCTURES, {
         filter: function (structure) {
-            return (structure.hits <= 5000 && structure.hits < structure.hitsMax && structure.hits / structure.hitsMax < 0.5);
+            return (structure.hits <= 5000 && structure.hits < (structure.hitsMax / 2));
         }
     });
     if (!target) {
         target = creep.pos.findClosestByRange(FIND_STRUCTURES, {
             filter: function (structure) {
-                return (structure.hits <= 50000 && structure.hits < structure.hitsMax && structure.hits / structure.hitsMax < 0.8);
+                return (structure.hits <= 50000 && structure.hits < (structure.hitsMax / 1.5));
             }
         });
     }
