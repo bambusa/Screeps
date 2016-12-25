@@ -17,7 +17,27 @@ module.exports.loop = function () {
         var creep = Game.creeps[name];
         populationCount[creep.memory.role]++;
 
-        switch (creep.memory.role) {
+        // Get role and if valid, replace with fallback role
+        var role = creep.memory.role;
+        if (creep.memory.fallbackUntil && creep.memory.fallbackUntil > Game.time) {
+            var fallbackRole = configs.population[creep.memory.role].fallbackRole;
+            if (fallbackRole) {
+                if (creep.memory.fallbackUntil == (Game.time + configs.settings.fallbackTicks - 1)) {
+                    creep.say("Fallback");
+                    creep.memory.source = null;
+                    creep.memory.target = null;
+                }
+                role = fallbackRole;
+            }
+        }
+        else if (creep.memory.fallbackUntil && creep.memory.fallbackUntil == Game.time) {
+            creep.say("Standard");
+            creep.memory.source = null;
+            creep.memory.target = null;
+            creep.memory.fallbackUntil = null;
+        }
+
+        switch (role) {
             case configs.roles.harvester:
                 harvester.loop(creep);
                 break;

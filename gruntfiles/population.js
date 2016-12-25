@@ -20,8 +20,12 @@ var getRandomName = function (prefix) {
     return "[" + prefix + "] " + name;
 };
 
+/** @param {Object} populationCount **/
 module.exports.loop = function (populationCount) {
-    // console.log("Current population: " + JSON.stringify(populationCount));
+    if (Memory.nextPopulationInfo <= Game.time) {
+        console.log("Current population: " + JSON.stringify(populationCount));
+        Memory.nextPopulationInfo = Game.time + configs.settings.populationInfoTicks;
+    }
 
     // Population check
     var needSpawn = false;
@@ -29,10 +33,13 @@ module.exports.loop = function (populationCount) {
         var creepRole = configs.population[key];
         // console.log("populationCount: " + populationCount[configs.roles[key]] + ", amount: " + creepRole.amount);
         if (populationCount[configs.roles[key]] < creepRole.amount) {
-            console.log("Reserving resources to spawn new creep: " + configs.roles[key]);
+            // console.log("Reserving resources to spawn new creep: " + configs.roles[key]);
             needSpawn = true;
             var result = Game.spawns.Spawn1.createCreep(creepRole.body, getRandomName(configs.roles[key]), creepRole.memory);
-            if (typeof result === 'string') console.log("Spawned new " + configs.roles[key] + ": " + result);
+            if (typeof result === 'string') {
+                console.log("Spawning new " + configs.roles[key] + ": " + result);
+                break;
+            }
         }
     }
     Game.spawns.Spawn1.room.memory.needSpawn = needSpawn;

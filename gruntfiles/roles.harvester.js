@@ -1,12 +1,31 @@
+var configs = require("configs");
+
+/** @param {Creep} creep **/
 module.exports.loop = function (creep) {
 
-    /**
-     * If creep can carry more energy, go harvest closest resource
-     */
-    if (creep.carry.energy < creep.carryCapacity) {
-        // console.log("harvesting: " + creep.name);
+    var target;
+    if (!creep.memory.targetId) {
+        target = findClosestTarget(creep);
 
-        // No source in memory
+        // No target available at the moment, activate fallback role
+        if (!target) {
+            creep.memory.targetId = null;
+            creep.memory.sourceId = null;
+            creep.memory.fallbackUntil = Game.time + configs.settings.fallbackTicks;
+        }
+        else creep.memory.targetId = target.id
+    }
+    else {
+        target = Game.getObjectById(creep.memory.targetId);
+        if (source === target) {
+            creep.memory.targetId = null;
+        }
+    }
+
+    /**
+     * If creep can carry more energy and is not near another target, go harvest closest resource
+     */
+    if (creep.carry.energy < creep.carryCapacity && !(creep.carry.energy >= 50 && creep.pos.inRangeTo(target, 3))) {
         var source;
         if (!creep.memory.sourceId) {
             source = findClosestSource(creep);
@@ -20,24 +39,31 @@ module.exports.loop = function (creep) {
         }
         else {
             source = Game.getObjectById(creep.memory.sourceId)
+            if (source === null) {
+                creep.memory.sourceId = null;
+            }
         }
 
         // Harvest or move to source
         if (source) {
-            var result = creep.harvest(source);
+            var result;
+            if (source.energyCapacity !== undefined)
+                result = creep.harvest(source);
+            else
+                result = creep.pickup(source);
 
             // If not in range, move to source
             if (result == ERR_NOT_IN_RANGE) {
 
                 // If path to source is blocked, find new closest source
                 if (creep.moveTo(source) == ERR_NO_PATH) {
-                    creep.memory.source = null;
+                    creep.memory.sourceId = null;
                 }
             }
 
             // If other error, find new closest source
             else if (result != OK) {
-                creep.memory.source = null;
+                creep.memory.sourceId = null;
             }
         }
     }
@@ -46,23 +72,6 @@ module.exports.loop = function (creep) {
      * If creep can't carry more energy, go unload it at closest target
      */
     else {
-        // console.log("unloading: " + creep.name);
-
-        // No target in memory
-        var target;
-        if (!creep.memory.targetId) {
-            target = findClosestTarget(creep);
-
-            // No target available at the moment, move to park position
-            if (!target) {
-                creep.say("No target available");
-                creep.moveTo(17, 22);
-            }
-            else creep.memory.targetId = target.id
-        }
-        else {
-            target = Game.getObjectById(creep.memory.targetId)
-        }
 
         // Unload at or move to target
         if (target) {
@@ -83,10 +92,12 @@ module.exports.loop = function (creep) {
                 creep.memory.targetId = null;
             }
 
-            // If other error, find new closest source and target
-            else {
+            // If other error, activate fallback role
+            else if (result != OK) {
+                console.log("ERROR while unloading: " + result + " (" + creep.name + ") at " + target.id + ": " + result);
                 creep.memory.targetId = null;
-                creep.memory.targetId = null;
+                creep.memory.sourceId = null;
+                creep.memory.fallbackUntil = Game.time + configs.settings.fallbackTicks;
             }
         }
     }
@@ -94,9 +105,12 @@ module.exports.loop = function (creep) {
 };
 
 var findClosestSource = function (creep) {
-    var source = creep.pos.findClosestByPath(FIND_SOURCES_ACTIVE);
+    var source = creep.pos.findClosestByRange(FIND_DROPPED_ENERGY);
     if (!source) {
-        console.log("No closest source found for " + creep.name);
+        source = creep.pos.findClosestByPath(FIND_SOURCES_ACTIVE);
+    }
+    if (!source) {
+        console.log("No harvester source found for " + creep.name);
     }
     return source;
 };
@@ -105,11 +119,18 @@ module.exports.findClosestSource = findClosestSource;
 var findClosestTarget = function (creep) {
     var target = creep.pos.findClosestByRange(FIND_MY_STRUCTURES, {
         filter: function (structure) {
-            return structure.energy < structure.energyCapacity;
+            return ((structure.structureType == STRUCTURE_SPAWN || structure.structureType == STRUCTURE_EXTENSION) && structure.energy < structure.energyCapacity);
         }
     });
     if (!target) {
-        console.log("No closest target found for " + creep.name);
+        target = creep.pos.findClosestByRange(FIND_STRUCTURES, {
+            filter: function (structure) {
+                return ((structure.structureType == STRUCTURE_CONTAINER) && structure.energy < structure.energyCapacity);
+            }
+        });
+    }
+    if (!target) {
+        console.log("No harvester target found for " + creep.name);
     }
     return target;
 };

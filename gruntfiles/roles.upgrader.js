@@ -1,3 +1,4 @@
+/** @param {Creep} creep **/
 module.exports.loop = function (creep) {
 
     /**
@@ -21,7 +22,7 @@ module.exports.loop = function (creep) {
 
             // If other error, log it and move to parking position
             else if (result != OK) {
-                console.log("ERROR while upgrading: " + result + " (" + creep.name + ")");
+                console.log("ERROR while upgrading: " + result + " (" + creep.name + ") at " + target.id + ": " + result);
                 creep.memory.targetId = null;
                 creep.moveTo(16, 22);
             }
@@ -31,7 +32,7 @@ module.exports.loop = function (creep) {
     /**
      * If creep isn't carrying any energy, collect some at closest structure
      */
-    if (creep.carry.energy < creep.carryCapacity) {
+    else if (!creep.room.memory.needSpawn && creep.carry.energy < creep.carryCapacity) {
         // console.log("collecting: " + creep.name);
 
         // No source in memory
@@ -48,6 +49,9 @@ module.exports.loop = function (creep) {
         }
         else {
             source = Game.getObjectById(creep.memory.sourceId)
+            if (source === null) {
+                creep.memory.sourceId = null;
+            }
         }
 
         // Collect from or move to source
@@ -59,13 +63,13 @@ module.exports.loop = function (creep) {
 
                 // If path to source is blocked, find new closest source
                 if (creep.moveTo(source) == ERR_NO_PATH) {
-                    creep.memory.source = null;
+                    creep.memory.sourceId = null;
                 }
             }
 
             // If other error, find new closest source
             else if (result != OK) {
-                creep.memory.source = null;
+                creep.memory.sourceId = null;
             }
         }
     }
@@ -78,7 +82,7 @@ var findClosestSource = function (creep) {
         }
     });
     if (!source) {
-        console.log("No closest source found for " + creep.name);
+        console.log("No upgrader source found for " + creep.name);
     }
     return source;
 };

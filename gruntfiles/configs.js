@@ -7,36 +7,45 @@ var roles = {
 
 var population = {
     harvester: {
-        body: [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, WORK, WORK],
+        body: [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, WORK, WORK],
         amount: 6,
         memory: {
             role: roles.harvester
         }
+        // fallbackRole: roles.repairer
     },
     upgrader: {
-        body: [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, WORK, WORK],
+        body: [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, WORK, WORK],
         amount: 4,
         memory: {
             role: roles.upgrader
         }
     },
-    builder: {
-        body: [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, WORK, WORK],
-        amount: 2,
-        memory: {
-            role: roles.builder
-        }
-    },
     repairer: {
-        body: [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, WORK, WORK],
-        amount: 2,
+        body: [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, WORK, WORK],
+        amount: 4,
         memory: {
             role: roles.repairer
         }
+        // fallbackRole: roles.upgrader
+    },
+    builder: {
+        body: [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, WORK, WORK],
+        amount: 2,
+        memory: {
+            role: roles.builder
+        },
+        fallbackRole: roles.repairer
     }
 };
 
+var settings = {
+    fallbackTicks: 50,
+    populationInfoTicks: 50
+}
+
 module.exports = {
     roles: roles,
-    population: population
+    population: population,
+    settings: settings
 };
