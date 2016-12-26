@@ -8,9 +8,7 @@ module.exports.loop = function (creep) {
         target = findClosestTarget(creep);
 
         // No target available at the moment, activate fallback role
-        if (!target) {
-            creep.memory.targetId = null;
-            creep.memory.sourceId = null;
+        if (!target && !(creep.memory.fallbackUntil && creep.memory.fallbackUntil > Game.time)) {
             creep.memory.fallbackUntil = Game.time + configs.settings.fallbackTicks;
         }
         else creep.memory.targetId = target.id
@@ -96,8 +94,6 @@ module.exports.loop = function (creep) {
             else if (result != OK) {
                 console.log("ERROR while unloading: " + result + " (" + creep.name + ") at " + target.id + ": " + result);
                 creep.memory.targetId = null;
-                creep.memory.sourceId = null;
-                creep.memory.fallbackUntil = Game.time + configs.settings.fallbackTicks;
             }
         }
     }
@@ -119,13 +115,15 @@ module.exports.findClosestSource = findClosestSource;
 var findClosestTarget = function (creep) {
     var target = creep.pos.findClosestByRange(FIND_MY_STRUCTURES, {
         filter: function (structure) {
-            return ((structure.structureType == STRUCTURE_SPAWN || structure.structureType == STRUCTURE_EXTENSION) && structure.energy < structure.energyCapacity);
+            return ((structure.structureType == STRUCTURE_SPAWN || structure.structureType == STRUCTURE_EXTENSION)
+                && structure.energy < structure.energyCapacity);
         }
     });
     if (!target) {
-        target = creep.pos.findClosestByRange(FIND_STRUCTURES, {
+        target = creep.pos.findClosestByRange(FIND_MY_STRUCTURES, {
             filter: function (structure) {
-                return ((structure.structureType == STRUCTURE_CONTAINER) && structure.energy < structure.energyCapacity);
+                return ((structure.structureType == STRUCTURE_TOWER)
+                && structure.energy < structure.energyCapacity);
             }
         });
     }

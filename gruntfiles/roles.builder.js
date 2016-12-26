@@ -6,7 +6,7 @@ module.exports.loop = function (creep) {
     /**
      * If creep carries energy, build or go to closest target
      */
-    if (creep.carry.energy > 0) {
+    if (creep.room.memory.needSpawn || creep.carry.energy > 0) {
         // console.log("building: " + creep.name);
 
         // No target in memory
@@ -15,9 +15,7 @@ module.exports.loop = function (creep) {
             target = findClosestTarget(creep);
 
             // No target available at the moment, activate fallback role
-            if (!target) {
-                creep.memory.targetId = null;
-                creep.memory.sourceId = null;
+            if (!target && !(creep.memory.fallbackUntil && creep.memory.fallbackUntil > Game.time)) {
                 creep.memory.fallbackUntil = Game.time + configs.settings.fallbackTicks;
             }
             else creep.memory.targetId = target.id
@@ -34,16 +32,14 @@ module.exports.loop = function (creep) {
             var result = creep.build(target);
 
             // If not in range, move to target
-            if (result == ERR_NOT_IN_RANGE) {
-                result = creep.moveTo(target);
+            if (creep.room.memory.needSpawn || result == ERR_NOT_IN_RANGE) {
+                creep.moveTo(target);
             }
 
-            // If other error, activate fallback role
+            // If other error, search new target
             else if (result != OK) {
                 console.log("ERROR while building: " + result + " (" + creep.name + ") at " + target.id + ": " + result);
                 creep.memory.targetId = null;
-                creep.memory.sourceId = null;
-                creep.memory.fallbackUntil = Game.time + configs.settings.fallbackTicks;
             }
         }
     }
@@ -97,7 +93,7 @@ module.exports.loop = function (creep) {
 var findClosestSource = function (creep) {
     var source = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
         filter: function (structure) {
-            return structure.energy > 0;
+            return (structure.energy > 0 && structure.structureType != STRUCTURE_TOWER);
         }
     });
     if (!source) {

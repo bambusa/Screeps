@@ -29,19 +29,42 @@ module.exports.loop = function (populationCount) {
 
     // Population check
     var needSpawn = false;
-    for (var key in configs.roles) {
-        var creepRole = configs.population[key];
-        // console.log("populationCount: " + populationCount[configs.roles[key]] + ", amount: " + creepRole.amount);
-        if (populationCount[configs.roles[key]] < creepRole.amount) {
-            // console.log("Reserving resources to spawn new creep: " + configs.roles[key]);
-            needSpawn = true;
-            var result = Game.spawns.Spawn1.createCreep(creepRole.body, getRandomName(configs.roles[key]), creepRole.memory);
-            if (typeof result === 'string') {
-                console.log("Spawning new " + configs.roles[key] + ": " + result);
-                break;
+    roleLoop:
+        for (var key in configs.roles) {
+            var creepRole = configs.population[key];
+            // console.log("populationCount: " + populationCount[configs.roles[key]] + ", amount: " + creepRole.amount);
+
+            // If role is claimer, check which room is the target
+            if (key == configs.roles.claimer) {
+                if (populationCount[configs.roles[key]].overall < creepRole.amount * creepRole.rooms.length) {
+                    for (var roomName in creepRole.rooms) {
+                        if (populationCount[configs.roles[key]][roomName] < creepRole.amount) {
+                            needSpawn = true;
+                            var memory = creepRole.memory;
+                            memory.claimRoom = roomName;
+                            var result = Game.spawns.Spawn1.createCreep(creepRole.body, getRandomName(configs.roles[key]), memory);
+                            if (typeof result === 'string') {
+                                console.log("Spawning new " + configs.roles[key] + ": " + result);
+                                break roleLoop;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Else for every other role
+            else {
+                if (populationCount[configs.roles[key]] < creepRole.amount) {
+                    // console.log("Reserving resources to spawn new creep: " + configs.roles[key]);
+                    needSpawn = true;
+                    var result = Game.spawns.Spawn1.createCreep(creepRole.body, getRandomName(configs.roles[key]), creepRole.memory);
+                    if (typeof result === 'string') {
+                        console.log("Spawning new " + configs.roles[key] + ": " + result);
+                        break roleLoop;
+                    }
+                }
             }
         }
-    }
     Game.spawns.Spawn1.room.memory.needSpawn = needSpawn;
 
     // Cleanup dead creeps

@@ -4,7 +4,7 @@ module.exports.loop = function (creep) {
     /**
      * If creep carries energy, upgrade or go to closest target
      */
-    if (creep.carry.energy > 0) {
+    if (creep.room.memory.needSpawn || creep.carry.energy > 0) {
         // console.log("upgrading: " + creep.name);
         var target = creep.room.controller;
         if (!target) {
@@ -16,15 +16,14 @@ module.exports.loop = function (creep) {
             var result = creep.upgradeController(target);
 
             // If not in range, move to target
-            if (result == ERR_NOT_IN_RANGE) {
-                result = creep.moveTo(target);
+            if (creep.room.memory.needSpawn || result == ERR_NOT_IN_RANGE) {
+                creep.moveTo(target);
             }
 
             // If other error, log it and move to parking position
             else if (result != OK) {
                 console.log("ERROR while upgrading: " + result + " (" + creep.name + ") at " + target.id + ": " + result);
                 creep.memory.targetId = null;
-                creep.moveTo(16, 22);
             }
         }
     }
@@ -78,7 +77,7 @@ module.exports.loop = function (creep) {
 var findClosestSource = function (creep) {
     var source = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
         filter: function (structure) {
-            return structure.energy > 0;
+            return (structure.energy > 0 && structure.structureType != STRUCTURE_TOWER);
         }
     });
     if (!source) {
@@ -89,16 +88,16 @@ var findClosestSource = function (creep) {
 module.exports.findClosestSource = findClosestSource;
 
 /*
- var findClosestTarget = function (creep) {
- var target = creep.pos.findClosestByRange(FIND_MY_STRUCTURES, {
- filter: function (structure) {
- return structure.energy < structure.energyCapacity;
- }
- });
- if (!target) {
- console.log("No closest target found for " + creep.name);
- }
- return target;
- };
- module.exports.findClosestTarget = findClosestTarget;
- */
+var findClosestTarget = function (creep) {
+    var target = creep.pos.findClosestByRange(FIND_MY_STRUCTURES, {
+        filter: function (structure) {
+            return structure.energy < structure.energyCapacity;
+        }
+    });
+    if (!target) {
+        console.log("No closest target found for " + creep.name);
+    }
+    return target;
+};
+module.exports.findClosestTarget = findClosestTarget;
+*/

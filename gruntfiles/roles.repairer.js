@@ -6,7 +6,7 @@ module.exports.loop = function (creep) {
     /**
      * If creep carries energy, repair or go to closest target
      */
-    if (creep.carry.energy > 0) {
+    if (creep.room.memory.needSpawn || creep.carry.energy > 0) {
         // console.log("repairing: " + creep.name);
 
         // No target in memory
@@ -15,9 +15,7 @@ module.exports.loop = function (creep) {
             target = findClosestTarget(creep);
 
             // No target available at the moment, activate fallback role
-            if (!target) {
-                creep.memory.targetId = null;
-                creep.memory.sourceId = null;
+            if (!target && !(creep.memory.fallbackUntil && creep.memory.fallbackUntil > Game.time)) {
                 creep.memory.fallbackUntil = Game.time + configs.settings.fallbackTicks;
             }
             else creep.memory.targetId = target.id
@@ -34,16 +32,14 @@ module.exports.loop = function (creep) {
             var result = creep.repair(target);
 
             // If not in range, move to target
-            if (result == ERR_NOT_IN_RANGE) {
-                result = creep.moveTo(target);
+            if (creep.room.memory.needSpawn || result == ERR_NOT_IN_RANGE) {
+                creep.moveTo(target);
             }
 
             // If other error, activate fallback role
             else if (result != OK) {
                 console.log("ERROR while repairing: " + result + " (" + creep.name + ") at " + target.id + ": " + result);
                 creep.memory.targetId = null;
-                creep.memory.sourceId = null;
-                creep.memory.fallbackUntil = Game.time + configs.settings.fallbackTicks;
             }
 
             else if (result == OK && target.hits == target.hitsMax) {
@@ -101,7 +97,7 @@ module.exports.loop = function (creep) {
 var findClosestSource = function (creep) {
     var source = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
         filter: function (structure) {
-            return structure.energy > 0;
+            return (structure.energy > 0 && structure.structureType != STRUCTURE_TOWER);
         }
     });
     if (!source) {
@@ -120,7 +116,7 @@ var findClosestTarget = function (creep) {
     if (!target) {
         target = creep.pos.findClosestByRange(FIND_STRUCTURES, {
             filter: function (structure) {
-                return (structure.hits <= 50000 && structure.hits < (structure.hitsMax / 1.5));
+                return (structure.hits <= 150000 && structure.hits < (structure.hitsMax / 1.5));
             }
         });
     }
