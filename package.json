@@ -7,7 +7,6 @@
   },
   "dependencies": {
     "grunt-cli": "*",
-    "grunt-screeps": "*",
-    "screeps-perf": "*"
+    "grunt-screeps": "*"
   }
 }

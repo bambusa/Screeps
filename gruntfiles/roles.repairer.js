@@ -6,7 +6,7 @@ module.exports.loop = function (creep) {
     /**
      * If creep carries energy, repair or go to closest target
      */
-    if (creep.room.memory.needSpawn || creep.carry.energy > 0) {
+    if (creep.carry.energy > 0) {
         // console.log("repairing: " + creep.name);
 
         // No target in memory
@@ -18,7 +18,7 @@ module.exports.loop = function (creep) {
             if (!target && !(creep.memory.fallbackUntil && creep.memory.fallbackUntil > Game.time)) {
                 creep.memory.fallbackUntil = Game.time + configs.settings.fallbackTicks;
             }
-            else creep.memory.targetId = target.id
+            else if (target) creep.memory.targetId = target.id
         }
         else {
             target = Game.getObjectById(creep.memory.targetId);
@@ -49,9 +49,9 @@ module.exports.loop = function (creep) {
     }
 
     /**
-     * If creep isn't carrying any energy, collect some at closest structure
+     * If creep isn't carrying any energy, collect some at closest container
      */
-    else if (!creep.room.memory.needSpawn && creep.carry.energy < creep.carryCapacity) {
+    else if (creep.carry.energy < creep.carryCapacity) {
         // console.log("collecting: " + creep.name);
 
         // No source in memory
@@ -95,9 +95,9 @@ module.exports.loop = function (creep) {
 };
 
 var findClosestSource = function (creep) {
-    var source = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
+    var source = creep.pos.findClosestByPath(FIND_STRUCTURES, {
         filter: function (structure) {
-            return (structure.energy > 0 && structure.structureType != STRUCTURE_TOWER);
+            return (structure.structureType == STRUCTURE_CONTAINER && structure.store[RESOURCE_ENERGY] > 0);
         }
     });
     if (!source) {

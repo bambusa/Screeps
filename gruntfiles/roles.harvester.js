@@ -11,7 +11,7 @@ module.exports.loop = function (creep) {
         if (!target && !(creep.memory.fallbackUntil && creep.memory.fallbackUntil > Game.time)) {
             creep.memory.fallbackUntil = Game.time + configs.settings.fallbackTicks;
         }
-        else creep.memory.targetId = target.id
+        else if (target) creep.memory.targetId = target.id
     }
     else {
         target = Game.getObjectById(creep.memory.targetId);
@@ -116,14 +116,14 @@ var findClosestTarget = function (creep) {
     var target = creep.pos.findClosestByRange(FIND_MY_STRUCTURES, {
         filter: function (structure) {
             return ((structure.structureType == STRUCTURE_SPAWN || structure.structureType == STRUCTURE_EXTENSION)
-                && structure.energy < structure.energyCapacity);
+            && structure.energy < structure.energyCapacity);
         }
     });
     if (!target) {
-        target = creep.pos.findClosestByRange(FIND_MY_STRUCTURES, {
+        target = creep.pos.findClosestByRange(FIND_STRUCTURES, {
             filter: function (structure) {
-                return ((structure.structureType == STRUCTURE_TOWER)
-                && structure.energy < structure.energyCapacity);
+                return ((structure.structureType == STRUCTURE_CONTAINER)
+                && structure.store[RESOURCE_ENERGY] < structure.storeCapacity);
             }
         });
     }

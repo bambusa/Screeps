@@ -16,14 +16,14 @@ var population = {
     },
     upgrader: {
         body: [MOVE, CARRY, WORK, WORK],
-        amount: 3,
+        amount: 4,
         memory: {
             role: roles.upgrader
         }
     },
     repairer: {
         body: [MOVE, CARRY, WORK, WORK],
-        amount: 0,
+        amount: 1,
         memory: {
             role: roles.repairer
         },
