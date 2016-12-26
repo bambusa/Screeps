@@ -8,30 +8,30 @@ var roles = {
 
 var population = {
     harvester: {
-        body: [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, WORK, WORK, WORK, WORK],
+        body: [MOVE, CARRY, WORK, WORK],
         amount: 8,
         memory: {
             role: roles.harvester
         }
     },
     upgrader: {
-        body: [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, WORK, WORK, WORK],
-        amount: 4,
+        body: [MOVE, CARRY, WORK, WORK],
+        amount: 3,
         memory: {
             role: roles.upgrader
         }
     },
     repairer: {
-        body: [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, WORK, WORK, WORK],
-        amount: 4,
+        body: [MOVE, CARRY, WORK, WORK],
+        amount: 0,
         memory: {
             role: roles.repairer
         },
         fallbackRole: roles.upgrader
     },
     builder: {
-        body: [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, WORK, WORK, WORK],
-        amount: 2,
+        body: [MOVE, CARRY, WORK, WORK],
+        amount: 3,
         memory: {
             role: roles.builder
         },
@@ -39,7 +39,7 @@ var population = {
     },
     claimer: {
         body: [MOVE, CLAIM],
-        amount: 2, // per room
+        amount: 0, // per room
         memory: {
             role: roles.claimer
         },
