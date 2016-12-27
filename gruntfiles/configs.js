@@ -1,49 +1,48 @@
 var roles = {
+    transporter: 'transporter',
     harvester: 'harvester',
     upgrader: 'upgrader',
-    builder: 'builder',
-    repairer: 'repairer',
+    maintainer: 'maintainer',
     claimer: 'claimer'
 };
 
 var population = {
+    transporter: {
+        body: [[MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY], [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY]],
+        amount: 5,
+        memory: {
+            role: roles.transporter
+        }
+    },
     harvester: {
-        body: [MOVE, CARRY, WORK, WORK],
-        amount: 8,
+        body: [[MOVE, MOVE, CARRY, WORK, WORK, WORK, WORK], [MOVE, CARRY, WORK, WORK]],
+        amount: 4,
         memory: {
             role: roles.harvester
         }
     },
     upgrader: {
-        body: [MOVE, CARRY, WORK, WORK],
-        amount: 4,
+        body: [[MOVE, MOVE, CARRY, WORK, WORK, WORK, WORK], [MOVE, CARRY, WORK, WORK]],
+        amount: 3,
         memory: {
             role: roles.upgrader
         }
     },
-    repairer: {
-        body: [MOVE, CARRY, WORK, WORK],
-        amount: 1,
+    maintainer: {
+        body: [[MOVE, MOVE, MOVE, CARRY, CARRY, WORK, WORK, WORK], [MOVE, CARRY, WORK, WORK]],
+        amount: 3,
         memory: {
-            role: roles.repairer
+            role: roles.maintainer
         },
         fallbackRole: roles.upgrader
     },
-    builder: {
-        body: [MOVE, CARRY, WORK, WORK],
-        amount: 3,
-        memory: {
-            role: roles.builder
-        },
-        fallbackRole: roles.repairer
-    },
     claimer: {
-        body: [MOVE, CLAIM],
+        body: [[MOVE, CLAIM]],
         amount: 0, // per room
         memory: {
             role: roles.claimer
         },
-        rooms: ['E23N78']
+        rooms: ['W21S71']
     }
 };
 

@@ -16,7 +16,7 @@ module.exports.loop = function (creep) {
             var result = creep.upgradeController(target);
 
             // If not in range, move to target
-            if (creep.room.memory.needSpawn || result == ERR_NOT_IN_RANGE) {
+            if (result == ERR_NOT_IN_RANGE) {
                 creep.moveTo(target);
             }
 
@@ -24,6 +24,11 @@ module.exports.loop = function (creep) {
             else if (result != OK) {
                 console.log("ERROR while upgrading: " + result + " (" + creep.name + ") at " + target.id + ": " + result);
                 creep.memory.targetId = null;
+            }
+
+            // If upgraded successfully and storage is empty, recalculate nearest source
+            else {
+                creep.memory.sourceId = null;
             }
         }
     }

@@ -104,19 +104,21 @@ var findClosestSource = function (creep) {
 module.exports.findClosestSource = findClosestSource;
 
 var findClosestTarget = function (creep) {
+
+    // Prio 1
     var target = creep.pos.findClosestByRange(FIND_CONSTRUCTION_SITES, {
         filter: function (structure) {
-            return (structure.structureType == STRUCTURE_CONTAINER); // structure.structureType == STRUCTURE_EXTENSION ||
+            return (structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_CONTAINER);
         }
     });
+
+    // Prio 2
     if (!target) {
         target = creep.pos.findClosestByRange(FIND_CONSTRUCTION_SITES);
     }
+
     if (!target) {
         console.log("No builder target found for " + creep.name);
-    }
-    else if (target.structureType == STRUCTURE_CONTAINER) {
-        console.log("Found container")
     }
     return target;
 };

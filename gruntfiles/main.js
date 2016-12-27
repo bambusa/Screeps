@@ -2,8 +2,8 @@ var configs = require("configs");
 var population = require("population");
 var harvester = require("roles.harvester");
 var upgrader = require("roles.upgrader");
-var builder = require("roles.builder");
-var repairer = require("roles.repairer");
+var maintainer = require("roles.maintainer");
+var transporter = require("roles.transporter");
 var claimer = require("roles.claimer");
 
 module.exports.loop = function () {
@@ -58,11 +58,11 @@ module.exports.loop = function () {
             case configs.roles.upgrader:
                 upgrader.loop(creep);
                 break;
-            case configs.roles.builder:
-                builder.loop(creep);
+            case configs.roles.maintainer:
+                maintainer.loop(creep);
                 break;
-            case configs.roles.repairer:
-                repairer.loop(creep);
+            case configs.roles.transporter:
+                transporter.loop(creep);
                 break;
             case configs.roles.claimer:
                 claimer.loop(creep);
