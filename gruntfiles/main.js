@@ -7,6 +7,9 @@ var transporter = require("roles.transporter");
 var claimer = require("roles.claimer");
 var expansionHarvester = require("roles.expansionHarvester");
 var expansionTransporter = require("roles.expansionTransporter");
+var distanceHarvester = require("roles.distanceHarvester");
+var tower = require("roles.tower");
+var soldierMelee = require("roles.soldierMelee");
 
 module.exports.loop = function () {
     // Count creeps for roles
@@ -22,7 +25,9 @@ module.exports.loop = function () {
     populationCount[configs.roles.expansionTransporter] = {};
     populationCount[configs.roles.expansionTransporter].overall = 0;
 
-    // Creep role routines
+    /**
+     * Creeps
+     */
     for (var name in Game.creeps) {
         var creep = Game.creeps[name];
 
@@ -85,6 +90,12 @@ module.exports.loop = function () {
             case configs.roles.expansionTransporter:
                 expansionTransporter.loop(creep);
                 break;
+            case configs.roles.distanceHarvester:
+                distanceHarvester.loop(creep);
+                break;
+            case configs.roles.soldierMelee:
+                soldierMelee.loop(creep);
+                break;
             default:
                 console.log("ERROR unknown creep role: " + creep.memory.role);
                 break;
@@ -92,4 +103,18 @@ module.exports.loop = function () {
     }
 
     population.loop(populationCount);
+
+    /**
+     * Towers
+     */
+    for (var name in Game.rooms) {
+        var towers = Game.rooms[name].find(FIND_MY_STRUCTURES, {
+            filter: function(structure) {
+                return (structure.structureType == STRUCTURE_TOWER);
+            }
+        })
+        for (var towerId in towers) {
+            tower.loop(towers[towerId]);
+        }
+    }
 };

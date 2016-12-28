@@ -39,7 +39,7 @@ module.exports.loop = function (creep) {
             }
 
             else if (result == ERR_NOT_ENOUGH_RESOURCES)
-                console.log("Harvested " + source.ticksToRegeneration + " before regeneration")
+                console.log("Harvested " + source.ticksToRegeneration + " before regeneration");
 
             // If other error, find new closest source
             else if (result != OK) {

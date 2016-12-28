@@ -79,7 +79,7 @@ module.exports.loop = function (creep) {
 };
 
 var findClosestSource = function (creep) {
-    var source = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+    var source = creep.room.controller.pos.findClosestByPath(FIND_STRUCTURES, {
         filter: function (structure) {
             return (structure.structureType == STRUCTURE_CONTAINER);
         }

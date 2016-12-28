@@ -22,6 +22,9 @@ module.exports.loop = function (creep) {
             if (source === null) {
                 creep.memory.sourceId = null;
             }
+            else if (source.energy < (creep.carryCapacity / 2)) {
+                source = findClosestSource(creep);
+            }
         }
 
         // Harvest or move to source

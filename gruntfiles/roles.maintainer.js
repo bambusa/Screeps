@@ -136,12 +136,21 @@ var findClosestTarget = function (creep) {
         }
     });
 
-    // Prio 2: New construction sites
+    // Prio 2: Important construction sites
+    if (!target) {
+        target = creep.pos.findClosestByRange(FIND_CONSTRUCTION_SITES, {
+            filter: function (structure) {
+                return (structure.structureType == STRUCTURE_EXTENSION);
+            }
+        });
+    }
+
+    // Prio 3: Other construction sites
     if (!target) {
         target = creep.pos.findClosestByRange(FIND_CONSTRUCTION_SITES);
     }
 
-    // Prio 3: Structures like walls etc. below 150k hits
+    // Prio 4: Structures like walls etc. below 150k hits
     if (!target) {
         target = creep.pos.findClosestByRange(FIND_STRUCTURES, {
             filter: function (structure) {
@@ -150,7 +159,7 @@ var findClosestTarget = function (creep) {
         });
     }
 
-    // Prio 4: Even tougher structures
+    // Prio 5: Even tougher structures
     if (!target) {
         target = creep.pos.findClosestByRange(FIND_STRUCTURES, {
             filter: function (structure) {
