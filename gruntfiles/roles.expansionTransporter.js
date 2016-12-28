@@ -4,21 +4,12 @@ var configs = require("configs");
 module.exports.loop = function (creep) {
 
     /**
-     * If creep is not in expansion room, move there
-     */
-    var roomName = creep.memory.claimRoom;
-    var spawnRoomName = Game.spawns.Spawn1.roomName;
-    /*if (creep.pos.roomName != roomName) {
-        creep.moveTo(new RoomPosition(25, 25, roomName));
-    }*/
-
-    /**
      * If creep carries energy, go unload it at closest target
      */
     if (creep.carry.energy > 0) {
         var target;
         if (!creep.memory.targetId) {
-            target = findClosestTarget(creep, roomName, spawnRoomName);
+            target = findClosestTarget(creep);
 
             // No target available at the moment, activate fallback role
             if (!target) {
@@ -47,11 +38,19 @@ module.exports.loop = function (creep) {
 
             // If not in range, move to target
             if (result == ERR_NOT_IN_RANGE) {
-                result = creep.moveTo(target);
+                var moveResult = creep.moveTo(target);
 
                 // If path to target is blocked, find new closest target
-                if (result == ERR_NO_PATH) {
+                if (moveResult == ERR_NO_PATH) {
                     creep.memory.targetId = null;
+                }
+                else if (moveResult == OK) {
+                    var look = creep.pos.lookFor(LOOK_STRUCTURES);
+                    // console.log("looking at " +JSON.stringify(look[0]))
+                    if (!(look.length > 0 && look[0].structureType && look[0].structureType == 'road')) {
+                        // console.log("New road for transporter");
+                        creep.room.createConstructionSite(creep.pos, STRUCTURE_ROAD);
+                    }
                 }
             }
 
@@ -73,6 +72,7 @@ module.exports.loop = function (creep) {
                 creep.memory.sourceId = null;
             }
         }
+
     }
 
     /**
@@ -81,7 +81,7 @@ module.exports.loop = function (creep) {
     else {
         var source;
         if (!creep.memory.sourceId) {
-            source = findClosestSource(creep, roomName);
+            source = findClosestSource(creep);
 
             // No source available at the moment
             if (!source) {
@@ -98,7 +98,7 @@ module.exports.loop = function (creep) {
 
         // Harvest or move to source
         if (source) {
-            var result = creep.withdraw(source);
+            var result = creep.withdraw(source, RESOURCE_ENERGY);
 
             // If not in range, move to source
             if (result == ERR_NOT_IN_RANGE) {
@@ -125,40 +125,34 @@ module.exports.loop = function (creep) {
 
 };
 
-var findClosestSource = function (creep, roomName) {
-    var source = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+var findClosestSource = function (creep) {
+    var source = Game.rooms[creep.memory.claimRoom].controller.pos.findClosestByRange(FIND_STRUCTURES, {
         filter: function (structure) {
-            return (structure.room.name == roomName && structure.structureType == STRUCTURE_CONTAINER &&
+            return (structure.structureType == STRUCTURE_CONTAINER &&
             structure.store[RESOURCE_ENERGY] > 0);
         }
     });
     if (!source) {
-        //console.log("No transporter container source found for " + creep.name);
+        console.log("No transporter container source found for " + creep.name);
     }
     return source;
 };
 module.exports.findClosestSource = findClosestSource;
 
-var findClosestTarget = function (creep, roomName, spawnRoomName) {
-    var target = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES, {
-        filter: function (structure) {
-            return (structure.room.name == roomName);
-        }
-    });
+var findClosestTarget = function (creep) {
+    var target = Game.rooms[creep.memory.claimRoom].controller.pos.findClosestByRange(FIND_CONSTRUCTION_SITES);
     if (!target) {
-        target = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+        target = Game.rooms[creep.memory.claimRoom].controller.pos.findClosestByRange(FIND_STRUCTURES, {
             filter: function (structure) {
-                return (structure.room.name == roomName &&
-                (structure.structureType == STRUCTURE_ROAD) &&
+                return ((structure.structureType == STRUCTURE_ROAD) &&
                 structure.hits < (structure.hitsMax / 2));
             }
         });
     }
     if (!target) {
-        target = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+        target = Game.spawns.Spawn1.pos.findClosestByRange(FIND_STRUCTURES, {
             filter: function (structure) {
-                return (structure.room.name == spawnRoomName &&
-                (structure.structureType == STRUCTURE_CONTAINER || structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) &&
+                return ((structure.structureType == STRUCTURE_CONTAINER) &&
                 structure.store[RESOURCE_ENERGY] < structure.storeCapacity);
             }
         });

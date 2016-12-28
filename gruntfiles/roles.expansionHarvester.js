@@ -4,20 +4,12 @@ var configs = require("configs");
 module.exports.loop = function (creep) {
 
     /**
-     * If creep is not in expansion room, move there
-     */
-    var roomName = creep.memory.claimRoom;
-    /*if (creep.pos.roomName != roomName) {
-        creep.moveTo(new RoomPosition(25, 25, roomName));
-    }*/
-
-    /**
      * If creep can carry more energy, go harvest closest resource
      */
     if (creep.carry.energy < creep.carryCapacity) {
         var source;
         if (!creep.memory.sourceId) {
-            source = findClosestSource(creep, roomName);
+            source = findClosestSource(creep);
 
             // No source available at the moment
             if (!source) {
@@ -65,7 +57,7 @@ module.exports.loop = function (creep) {
     else {
         var target;
         if (!creep.memory.targetId) {
-            target = findClosestTarget(creep, roomName);
+            target = findClosestTarget(creep);
 
             // No target available at the moment, activate fallback role
             if (!target) {
@@ -94,10 +86,10 @@ module.exports.loop = function (creep) {
 
             // If not in range, move to target
             if (result == ERR_NOT_IN_RANGE) {
-                result = creep.moveTo(target);
+                var moveResult = creep.moveTo(target);
 
                 // If path to target is blocked, find new closest target
-                if (result == ERR_NO_PATH) {
+                if (moveResult == ERR_NO_PATH) {
                     creep.memory.targetId = null;
                 }
             }
@@ -124,12 +116,8 @@ module.exports.loop = function (creep) {
 
 };
 
-var findClosestSource = function (creep, roomName) {
-    var source = creep.pos.findClosestByPath(FIND_SOURCES, {
-        filter: function (source) {
-            return (source.room.name == roomName)
-        }
-    });
+var findClosestSource = function (creep) {
+    var source = Game.rooms[creep.memory.claimRoom].controller.pos.findClosestByRange(FIND_SOURCES);
     if (!source) {
         console.log("No harvester source found for " + creep.name);
     }
@@ -137,16 +125,16 @@ var findClosestSource = function (creep, roomName) {
 };
 module.exports.findClosestSource = findClosestSource;
 
-var findClosestTarget = function (creep, roomName) {
-    var target = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES, {
+var findClosestTarget = function (creep) {
+    var target = Game.rooms[creep.memory.claimRoom].controller.pos.findClosestByRange(FIND_CONSTRUCTION_SITES, {
         filter: function (source) {
-            return (source.room.name == roomName && source.structureType == STRUCTURE_CONTAINER)
+            return (source.structureType == STRUCTURE_CONTAINER)
         }
     });
     if (!target) {
-        target = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+        target = Game.spawns.Spawn1.pos.findClosestByRange(FIND_STRUCTURES, {
             filter: function (structure) {
-                return (structure.room.name == roomName && structure.structureType == STRUCTURE_CONTAINER &&
+                return (structure.structureType == STRUCTURE_CONTAINER &&
                 structure.store[RESOURCE_ENERGY] < structure.storeCapacity);
             }
         });
