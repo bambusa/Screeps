@@ -5,27 +5,39 @@ var upgrader = require("roles.upgrader");
 var maintainer = require("roles.maintainer");
 var transporter = require("roles.transporter");
 var claimer = require("roles.claimer");
+var expansionHarvester = require("roles.expansionHarvester");
+var expansionTransporter = require("roles.expansionTransporter");
 
 module.exports.loop = function () {
     // Count creeps for roles
     var populationCount = {};
     for (var key in configs.roles) {
-        populationCount[configs.roles[key]] = 0;
+        if (key != configs.roles.claimer)
+            populationCount[configs.roles[key]] = 0;
     }
+    populationCount[configs.roles.claimer] = {};
     populationCount[configs.roles.claimer].overall = 0;
+    populationCount[configs.roles.expansionHarvester] = {};
+    populationCount[configs.roles.expansionHarvester].overall = 0;
+    populationCount[configs.roles.expansionTransporter] = {};
+    populationCount[configs.roles.expansionTransporter].overall = 0;
 
     // Creep role routines
     for (var name in Game.creeps) {
         var creep = Game.creeps[name];
 
-        // Count creeps for each role
-        if (creep.memory.role == configs.roles.claimer) {
+        /*
+         Count creeps for each role
+         */
+
+        // Count expansion roles for each room
+        if (creep.memory.role == configs.roles.claimer || creep.memory.role == configs.roles.expansionHarvester || creep.memory.role == configs.roles.expansionTransporter) {
             populationCount[creep.memory.role].overall++;
             var roomCount = populationCount[creep.memory.role][creep.memory.claimRoom];
             if (!roomCount)
-                roomCount = 1;
+                populationCount[creep.memory.role][creep.memory.claimRoom] = 1;
             else
-                roomCount++;
+                populationCount[creep.memory.role][creep.memory.claimRoom]++;
         }
         else {
             populationCount[creep.memory.role]++;
@@ -66,6 +78,12 @@ module.exports.loop = function () {
                 break;
             case configs.roles.claimer:
                 claimer.loop(creep);
+                break;
+            case configs.roles.expansionHarvester:
+                expansionHarvester.loop(creep);
+                break;
+            case configs.roles.expansionTransporter:
+                expansionTransporter.loop(creep);
                 break;
             default:
                 console.log("ERROR unknown creep role: " + creep.memory.role);

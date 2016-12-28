@@ -26,7 +26,7 @@ module.exports.loop = function (creep) {
         }
 
         // If other error, log it and move to parking position
-        else if (result != OK) {
+        else if (result != OK && !creep.spawning) {
             console.log("ERROR while claiming: " + result + " (" + creep.name + " at " + target.id + ")");
             creep.memory.targetId = null;
         }
@@ -38,10 +38,13 @@ var findClosestTarget = function (creep) {
     var target;
     if (creep.memory.claimRoom) {
         var roomName = creep.memory.claimRoom;
-        var target = Game.rooms[roomName].controller;
-        if (!target) {
+        var room = Game.rooms[roomName];
+        if (!room) {
             console.log("ERROR can't find room " + roomName + " or controller for " + creep.name);
             creep.moveTo(new RoomPosition(25, 25, roomName));
+        }
+        else {
+            var target = room.controller;
         }
     }
     else {

@@ -3,44 +3,74 @@ var roles = {
     harvester: 'harvester',
     upgrader: 'upgrader',
     maintainer: 'maintainer',
-    claimer: 'claimer'
+    claimer: 'claimer',
+    expansionHarvester: 'expansionHarvester',
+    expansionTransporter: 'expansionTransporter'
 };
 
 var population = {
     transporter: {
-        body: [[MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY], [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY]],
-        amount: 5,
+        body: [[MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY],
+            [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY],
+            [MOVE, MOVE, CARRY, CARRY, CARRY]],
+        amount: 3,
         memory: {
             role: roles.transporter
         }
     },
     harvester: {
-        body: [[MOVE, MOVE, CARRY, WORK, WORK, WORK, WORK], [MOVE, CARRY, WORK, WORK]],
-        amount: 4,
+        body: [[MOVE, MOVE, CARRY, WORK, WORK, WORK, WORK, WORK, WORK],
+            [MOVE, CARRY, WORK, WORK, WORK, WORK],
+            [MOVE, CARRY, WORK, WORK]],
+        amount: 2,
         memory: {
             role: roles.harvester
         }
     },
     upgrader: {
-        body: [[MOVE, MOVE, CARRY, WORK, WORK, WORK, WORK], [MOVE, CARRY, WORK, WORK]],
-        amount: 3,
+        body: [[MOVE, MOVE, MOVE, CARRY, WORK, WORK, WORK, WORK, WORK, WORK],
+            [MOVE, MOVE, MOVE, CARRY, WORK, WORK, WORK, WORK],
+            [MOVE, CARRY, WORK, WORK]],
+        amount: 2,
         memory: {
             role: roles.upgrader
         }
     },
     maintainer: {
-        body: [[MOVE, MOVE, MOVE, CARRY, CARRY, WORK, WORK, WORK], [MOVE, CARRY, WORK, WORK]],
-        amount: 3,
+        body: [[MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, WORK, WORK, WORK, WORK],
+            [MOVE, MOVE, MOVE, CARRY, CARRY, WORK, WORK, WORK],
+            [MOVE, CARRY, WORK, WORK]],
+        amount: 2,
         memory: {
             role: roles.maintainer
         },
         fallbackRole: roles.upgrader
     },
     claimer: {
-        body: [[MOVE, CLAIM]],
-        amount: 0, // per room
+        body: [[MOVE, MOVE, MOVE, CLAIM]],
+        amount: 2, // per room
         memory: {
             role: roles.claimer
+        },
+        rooms: ['W21S71']
+    },
+    expansionHarvester: {
+        body: [[MOVE, MOVE, MOVE, CARRY, WORK, WORK, WORK, WORK, WORK, WORK],
+            [MOVE, MOVE, CARRY, WORK, WORK, WORK, WORK],
+            [MOVE, CARRY, WORK, WORK]],
+        amount: 1,
+        memory: {
+            role: roles.expansionHarvester
+        },
+        rooms: ['W21S71']
+    },
+    expansionTransporter: {
+        body: [[MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY],
+            [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY],
+            [MOVE, MOVE, CARRY, CARRY, CARRY]],
+        amount: 1,
+        memory: {
+            role: roles.expansionTransporter
         },
         rooms: ['W21S71']
     }
@@ -48,7 +78,7 @@ var population = {
 
 var settings = {
     fallbackTicks: 50,
-    populationInfoTicks: 50
+    populationInfoTicks: 25
 };
 
 module.exports = {

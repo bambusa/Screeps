@@ -37,14 +37,14 @@ module.exports.loop = function (creep) {
                     creep.memory.sourceId = null;
                     creep.memory.targetId = null;
                 }
-                else if (moveResult == OK) {
+                /*else if (moveResult == OK) {
                     var look = creep.pos.lookFor(LOOK_STRUCTURES);
                     // console.log("looking at " +JSON.stringify(look[0]))
                     if (!(look.length > 0 && look[0].structureType && look[0].structureType == 'road')) {
                         // console.log("New road for transporter");
-                        // creep.room.createConstructionSite(creep.pos, STRUCTURE_ROAD);
+                        creep.room.createConstructionSite(creep.pos, STRUCTURE_ROAD);
                     }
-                }
+                }*/
             }
 
             // If other error, find new closest source
@@ -70,7 +70,7 @@ module.exports.loop = function (creep) {
 
             // No target available at the moment, activate fallback role
             if (!target) {
-                creep.say("No target");
+                //creep.say("No target");
             }
             else {
                 creep.memory.targetId = target.id;
@@ -93,14 +93,14 @@ module.exports.loop = function (creep) {
                 if (moveResult == ERR_NO_PATH) {
                     creep.memory.targetId = null;
                 }
-                else if (moveResult == OK) {
+                /*else if (moveResult == OK) {
                     var look = creep.pos.lookFor(LOOK_STRUCTURES);
                     // console.log("looking at " +JSON.stringify(look[0]))
                     if (!(look.length > 0 && look[0].structureType && look[0].structureType == 'road')) {
                         // console.log("New road for transporter");
-                        // creep.room.createConstructionSite(creep.pos, STRUCTURE_ROAD);
+                        creep.room.createConstructionSite(creep.pos, STRUCTURE_ROAD);
                     }
-                }
+                }*/
             }
 
             // If target is fully loaded, find new closest target
@@ -118,7 +118,6 @@ module.exports.loop = function (creep) {
 
             // If transfered successfully, reset source and target
             else {
-                creep.memory.targetId = null;
                 creep.memory.sourceId = null;
             }
         }
@@ -129,7 +128,8 @@ module.exports.loop = function (creep) {
 var findClosestSource = function (creep) {
     var containers = creep.room.find(FIND_STRUCTURES, {
         filter: function(structure) {
-            return (structure.structureType == STRUCTURE_CONTAINER && structure.store[RESOURCE_ENERGY] > 0)
+            return (structure.structureType == STRUCTURE_CONTAINER && structure.store[RESOURCE_ENERGY] > 0 &&
+            structure.id != creep.memory.targetId)
         }
     });
     var source;
@@ -138,7 +138,7 @@ var findClosestSource = function (creep) {
             source = containers[i];
     }
     if (!source) {
-        console.log("No upgrader source found for " + creep.name);
+        console.log("No transporter source found for " + creep.name);
     }
     return source;
 };
@@ -154,11 +154,32 @@ var findClosestTarget = function (creep) {
         }
     });
 
-    // Prio 2: Container in room with least energy
+    // Prio 2: Towers
     if (!target) {
+        target = creep.pos.findClosestByRange(FIND_MY_STRUCTURES, {
+            filter: function (structure) {
+                return ((structure.structureType == STRUCTURE_TOWER) &&
+                structure.energy < structure.energyCapacity);
+            }
+        });
+    }
+
+    // Prio 3: Container in room near controller
+    if (!target) {
+        console.log(creep.room.controller.pos.findClosestByRange(FIND_STRUCTURES))
+        target = creep.room.controller.pos.findClosestByRange(FIND_STRUCTURES, {
+            filter: function (structure) {
+                return (structure.structureType == STRUCTURE_CONTAINER &&
+                structure.store[RESOURCE_ENERGY] < structure.storeCapacity);
+            }
+        });
+    }
+
+    /*if (!target) {
         var containers = creep.room.find(FIND_STRUCTURES, {
             filter: function (structure) {
-                return (structure.structureType == STRUCTURE_CONTAINER && structure.store[RESOURCE_ENERGY] < structure.storeCapacity)
+                return (structure.structureType == STRUCTURE_CONTAINER && structure.store[RESOURCE_ENERGY] < structure.storeCapacity
+                && (structure.id != '5861b0ebd10b651a066c6eeb' || structure.id != '58615a856d8b87be70fefac2'))
             }
         });
         for (var i in containers) {
@@ -166,7 +187,7 @@ var findClosestTarget = function (creep) {
                 target = containers[i];
             }
         }
-    }
+    }*/
 
     if (!target) {
         console.log("No transporter container target container found for " + creep.name);

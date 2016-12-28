@@ -35,17 +35,23 @@ module.exports.loop = function (populationCount) {
             // console.log("populationCount: " + populationCount[configs.roles[key]] + ", amount: " + creepRole.amount);
 
             // If role is claimer, check which room is the target
-            if (key == configs.roles.claimer) {
+            if (key == configs.roles.claimer || key == configs.roles.expansionHarvester || key == configs.roles.expansionTransporter) {
                 if (populationCount[configs.roles[key]].overall < creepRole.amount * creepRole.rooms.length) {
-                    for (var roomName in creepRole.rooms) {
-                        if (populationCount[configs.roles[key]][roomName] < creepRole.amount) {
+                    for (var i in creepRole.rooms) {
+                        var roomName = creepRole.rooms[i]
+                        if (!populationCount[configs.roles[key]][roomName] || populationCount[configs.roles[key]][roomName] < creepRole.amount) {
                             needSpawn = true;
                             var memory = creepRole.memory;
                             memory.claimRoom = roomName;
-                            var result = Game.spawns.Spawn1.createCreep(creepRole.body, getRandomName(configs.roles[key]), memory);
-                            if (typeof result === 'string') {
-                                console.log("Spawning new " + configs.roles[key] + ": " + result);
-                                break roleLoop;
+
+                            for (var i in creepRole.body) {
+                                var body = creepRole.body[i];
+                                // console.log("Check body " + JSON.stringify(body));
+                                if (Game.spawns.Spawn1.canCreateCreep(body) == OK) {
+                                    console.log("Spawning new " + configs.roles[key]);
+                                    Game.spawns.Spawn1.createCreep(body, getRandomName(configs.roles[key]), memory);
+                                    break roleLoop;
+                                }
                             }
                         }
                     }
@@ -62,6 +68,7 @@ module.exports.loop = function (populationCount) {
                         var body = creepRole.body[i];
                         // console.log("Check body " + JSON.stringify(body));
                         if (Game.spawns.Spawn1.canCreateCreep(body) == OK) {
+                            console.log("Spawning new " + configs.roles[key]);
                             Game.spawns.Spawn1.createCreep(body, getRandomName(configs.roles[key]), creepRole.memory);
                             break roleLoop;
                         }

@@ -46,8 +46,7 @@ module.exports.loop = function (creep) {
 
             // No source available at the moment, move to park position
             if (!source) {
-                creep.say("No source available");
-                creep.moveTo(16, 22);
+                //creep.say("No source");
             }
             else creep.memory.sourceId = source.id
         }
@@ -82,7 +81,7 @@ module.exports.loop = function (creep) {
 var findClosestSource = function (creep) {
     var source = creep.pos.findClosestByPath(FIND_STRUCTURES, {
         filter: function (structure) {
-            return (structure.structureType == STRUCTURE_CONTAINER && structure.store[RESOURCE_ENERGY] > 0);
+            return (structure.structureType == STRUCTURE_CONTAINER);
         }
     });
     if (!source) {
