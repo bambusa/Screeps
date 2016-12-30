@@ -117,7 +117,7 @@ module.exports.loop = function (creep) {
 var findClosestSource = function (creep) {
     var source = creep.pos.findClosestByPath(FIND_STRUCTURES, {
         filter: function (structure) {
-            return (structure.structureType == STRUCTURE_CONTAINER && structure.store[RESOURCE_ENERGY] > 500);
+            return (structure.structureType == STRUCTURE_CONTAINER && structure.store[RESOURCE_ENERGY] > 100);
         }
     });
     if (!source) {

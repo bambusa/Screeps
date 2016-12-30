@@ -13,7 +13,7 @@ module.exports.loop = function (creep) {
 
             // No target available at the moment, activate fallback role
             if (!target) {
-                creep.say("No target");
+                // creep.say("No target");
             }
             else {
                 creep.memory.targetId = target.id;
@@ -118,29 +118,40 @@ module.exports.loop = function (creep) {
 };
 
 var findClosestSource = function (creep) {
-    var source = Game.rooms[creep.memory.claimRoom].controller.pos.findClosestByRange(FIND_STRUCTURES, {
-        filter: function (structure) {
-            return (structure.structureType == STRUCTURE_CONTAINER &&
-            structure.store[RESOURCE_ENERGY] > 0);
+    var source;
+    if (creep.room.name != creep.memory.claimRoom) {
+        creep.moveTo(new RoomPosition(25, 25, creep.memory.claimRoom));
+    }
+    else {
+        source = creep.pos.findClosestByRange(FIND_STRUCTURES, {
+            filter: function (structure) {
+                return (structure.structureType == STRUCTURE_CONTAINER &&
+                structure.store[RESOURCE_ENERGY] > 0);
+            }
+        });
+        if (!source) {
+            console.log("No transporter container source found for " + creep.name);
         }
-    });
-    if (!source) {
-        console.log("No transporter container source found for " + creep.name);
     }
     return source;
 };
 module.exports.findClosestSource = findClosestSource;
 
 var findClosestTarget = function (creep) {
-    var target = Game.spawns.Spawn1.pos.findClosestByRange(FIND_STRUCTURES, {
-        filter: function (structure) {
-            return ((structure.structureType == STRUCTURE_CONTAINER) &&
-            structure.store[RESOURCE_ENERGY] < structure.storeCapacity);
+    var target
+    if (creep.room.name != creep.memory.homeRoom) {
+        creep.moveTo(new RoomPosition(25, 25, creep.memory.homeRoom));
+    }
+    else {
+        target = creep.pos.findClosestByRange(FIND_STRUCTURES, {
+            filter: function (structure) {
+                return ((structure.structureType == STRUCTURE_CONTAINER) &&
+                structure.store[RESOURCE_ENERGY] < structure.storeCapacity);
+            }
+        });
+        if (!target) {
+            console.log("No transporter target container found for " + creep.name);
         }
-    });
-
-    if (!target) {
-        console.log("No transporter target container found for " + creep.name);
     }
     return target;
 };

@@ -25,10 +25,10 @@ module.exports.loop = function (creep) {
     // console.log(creep.carry.energy + " " + creep.carryCapacity + " " + creep.pos.isNearTo(source))
     // console.log(creep.carry.energy == 0)
     // console.log(creep.carry.energy < creep.carryCapacity && creep.pos.isNearTo(source))
-    if (creep.carry.energy == 0 || (creep.carry.energy < creep.carryCapacity && creep.pos.isNearTo(source))) {
+    if (creep.carry.energy == 0) {
 
         // Harvest or move to source
-        var result = creep.harvest(source);
+        var result = creep.withdraw(source, RESOURCE_ENERGY);
 
         // If not in range, move to source
         if (result == ERR_NOT_IN_RANGE) {
@@ -47,7 +47,7 @@ module.exports.loop = function (creep) {
         }
 
         // If harvested successfully and storage is full, recalculate nearest target
-        else if (creep.carry.energy == creep.carryCapacity) {
+        else {
             creep.memory.targetId = null;
         }
 
@@ -61,7 +61,7 @@ module.exports.loop = function (creep) {
         if (!creep.memory.targetId) {
             target = findClosestTarget(creep);
 
-            // No target available at the moment, activate fallback role
+                // No target available at the moment, activate fallback role
             if (!target) {
                 // creep.say("No target");
             }
@@ -81,10 +81,8 @@ module.exports.loop = function (creep) {
             var result;
             if (target.progressTotal)
                 result = creep.build(target);
-            else if (target.hits < target.hitsMax / 2)
-                result = creep.repair(target);
             else
-                result = creep.transfer(target, RESOURCE_ENERGY);
+                result = creep.repair(target);
 
             // If not in range, move to target
             if (result == ERR_NOT_IN_RANGE) {
@@ -104,7 +102,7 @@ module.exports.loop = function (creep) {
 
             // If other error, reset source and target
             else if (result != OK) {
-                console.log("ERROR while transfering: " + result + " (" + creep.name + ") at " + target.id + ": " + result);
+                console.log("ERROR while maintaining: " + result + " (" + creep.name + ") at " + target.id + ": " + result);
                 creep.memory.targetId = null;
                 creep.memory.sourceId = null;
             }
@@ -125,21 +123,14 @@ var findClosestSource = function (creep) {
         creep.moveTo(new RoomPosition(25, 25, creep.memory.claimRoom));
     }
     else {
-        var sources = creep.room.find(FIND_SOURCES);
-        for (var id in sources) {
-            var thisSource = sources[id];
-            var harvestersAround = thisSource.pos.findInRange(FIND_MY_CREEPS, 1, {
-                filter: function (creep) {
-                    return (creep.memory.role == configs.roles.harvester);
-                }
-            })
-            if (!harvestersAround.length) {
-                source = thisSource;
-                break;
+        source = creep.pos.findClosestByRange(FIND_STRUCTURES, {
+            filter: function (structure) {
+                return (structure.structureType == STRUCTURE_CONTAINER &&
+                structure.store[RESOURCE_ENERGY] > 0);
             }
-        }
+        });
         if (!source) {
-            console.log("No harvester source found for " + creep.name);
+            console.log("No transporter container source found for " + creep.name);
         }
     }
     return source;
@@ -147,29 +138,23 @@ var findClosestSource = function (creep) {
 module.exports.findClosestSource = findClosestSource;
 
 var findClosestTarget = function (creep) {
-    var target;
-    /*var target = creep.pos.findClosestByRange(FIND_STRUCTURES, {
+    var target = creep.pos.findClosestByRange(FIND_STRUCTURES, {
         filter: function (structure) {
             return (structure.hits < (structure.hitsMax / 2));
         }
-    });*/
-    /*if (!target) {
-        target = creep.pos.findClosestByRange(FIND_CONSTRUCTION_SITES, {
-            filter: function (source) {
-                return (source.structureType == STRUCTURE_CONTAINER || source.structureType == STRUCTURE_ROAD);
-            }
-        });
-    }*/
+    });
+    if (!target) {
+        target = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
+    }
     if (!target) {
         target = creep.pos.findClosestByRange(FIND_STRUCTURES, {
             filter: function (structure) {
-                return (structure.structureType == STRUCTURE_CONTAINER &&
-                structure.store[RESOURCE_ENERGY] < structure.storeCapacity);
+                return (structure.hits < structure.hitsMax);
             }
         });
     }
     if (!target) {
-        console.log("No harvester target container found for " + creep.name);
+        console.log("No maintainer target container found for " + creep.name);
     }
     return target;
 };

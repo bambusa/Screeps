@@ -38,8 +38,8 @@ module.exports.loop = function (creep) {
                 }
             }
 
-            else if (result == ERR_NOT_ENOUGH_RESOURCES)
-                console.log("Harvested " + source.ticksToRegeneration + " before regeneration");
+            // else if (result == ERR_NOT_ENOUGH_RESOURCES)
+            //     console.log("Harvested " + source.ticksToRegeneration + " before regeneration");
 
             // If other error, find new closest source
             else if (result != OK) {
@@ -106,7 +106,7 @@ module.exports.loop = function (creep) {
 
             // If unloaded successfully, recalculate closest source
             else {
-                creep.memory.sourceId = null;
+                // creep.memory.sourceId = null;
             }
         }
     }
@@ -114,7 +114,20 @@ module.exports.loop = function (creep) {
 };
 
 var findClosestSource = function (creep) {
-    var source = creep.pos.findClosestByPath(FIND_SOURCES);
+    var source;
+    var sources = creep.room.find(FIND_SOURCES);
+    for (var id in sources) {
+        var thisSource = sources[id];
+        var harvestersAround = thisSource.pos.findInRange(FIND_MY_CREEPS, 1, {
+            filter: function(creep) {
+                return (creep.memory.role == configs.roles.harvester);
+            }
+        })
+        if (!harvestersAround.length) {
+            var source = thisSource;
+            break;
+        }
+    }
     if (!source) {
         console.log("No harvester source found for " + creep.name);
     }

@@ -7,23 +7,23 @@ var transporter = require("roles.transporter");
 var claimer = require("roles.claimer");
 var expansionHarvester = require("roles.expansionHarvester");
 var expansionTransporter = require("roles.expansionTransporter");
-var distanceHarvester = require("roles.distanceHarvester");
+var expansionMaintainer = require("roles.expansionMaintainer");
 var tower = require("roles.tower");
 var soldierMelee = require("roles.soldierMelee");
 
 module.exports.loop = function () {
     // Count creeps for roles
+    var sourcesOccupied = [];
     var populationCount = {};
     for (var key in configs.roles) {
         if (key != configs.roles.claimer)
             populationCount[configs.roles[key]] = 0;
     }
     populationCount[configs.roles.claimer] = {};
-    populationCount[configs.roles.claimer].overall = 0;
     populationCount[configs.roles.expansionHarvester] = {};
-    populationCount[configs.roles.expansionHarvester].overall = 0;
     populationCount[configs.roles.expansionTransporter] = {};
-    populationCount[configs.roles.expansionTransporter].overall = 0;
+    populationCount[configs.roles.expansionMaintainer] = {};
+    populationCount[configs.roles.soldierMelee] = {};
 
     /**
      * Creeps
@@ -34,10 +34,10 @@ module.exports.loop = function () {
         /*
          Count creeps for each role
          */
-
         // Count expansion roles for each room
-        if (creep.memory.role == configs.roles.claimer || creep.memory.role == configs.roles.expansionHarvester || creep.memory.role == configs.roles.expansionTransporter) {
-            populationCount[creep.memory.role].overall++;
+        if (creep.memory.role == configs.roles.claimer || creep.memory.role == configs.roles.expansionHarvester ||
+            creep.memory.role == configs.roles.expansionTransporter || creep.memory.role == configs.roles.expansionMaintainer ||
+            creep.memory.role == configs.roles.soldierMelee) {
             var roomCount = populationCount[creep.memory.role][creep.memory.claimRoom];
             if (!roomCount)
                 populationCount[creep.memory.role][creep.memory.claimRoom] = 1;
@@ -90,8 +90,8 @@ module.exports.loop = function () {
             case configs.roles.expansionTransporter:
                 expansionTransporter.loop(creep);
                 break;
-            case configs.roles.distanceHarvester:
-                distanceHarvester.loop(creep);
+            case configs.roles.expansionMaintainer:
+                expansionMaintainer.loop(creep);
                 break;
             case configs.roles.soldierMelee:
                 soldierMelee.loop(creep);
