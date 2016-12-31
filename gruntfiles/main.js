@@ -4,6 +4,7 @@ var harvester = require("roles.harvester");
 var upgrader = require("roles.upgrader");
 var maintainer = require("roles.maintainer");
 var transporter = require("roles.transporter");
+var recharger = require("roles.recharger");
 var claimer = require("roles.claimer");
 var expansionHarvester = require("roles.expansionHarvester");
 var expansionTransporter = require("roles.expansionTransporter");
@@ -81,6 +82,9 @@ module.exports.loop = function () {
             case configs.roles.transporter:
                 transporter.loop(creep);
                 break;
+            case configs.roles.recharger:
+                recharger.loop(creep);
+                break;
             case configs.roles.claimer:
                 claimer.loop(creep);
                 break;
@@ -116,5 +120,15 @@ module.exports.loop = function () {
         for (var towerId in towers) {
             tower.loop(towers[towerId]);
         }
+    }
+
+    /**
+     * Enemies
+     */
+    for (var name in Game.rooms) {
+        var enemies = Game.rooms[name].find(FIND_HOSTILE_CREEPS);
+        if (enemies.length)
+            console.log("Need " + enemies.length + " soldiers in " + name);
+        configs.population.soldierMelee.rooms[name] = enemies.length;
     }
 };

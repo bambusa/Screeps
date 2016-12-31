@@ -6,7 +6,7 @@ module.exports.loop = function (creep) {
     /**
      * If storage is not full, go withdraw closest resource
      */
-    if (creep.carry.energy < (creep.carryCapacity / 2)) {
+    if (creep.carry.energy < 50) {
         var source;
         if (!creep.memory.sourceId) {
             source = findClosestSource(creep);
@@ -29,11 +29,7 @@ module.exports.loop = function (creep) {
 
         // Harvest or move to source
         if (source) {
-            var result;
-            if (!source.amount)
-                result = creep.withdraw(source, RESOURCE_ENERGY);
-            else
-                result = creep.pickup(source);
+            var result = creep.withdraw(source, RESOURCE_ENERGY);
 
             // If not in range, move to source
             if (result == ERR_NOT_IN_RANGE) {
@@ -45,14 +41,22 @@ module.exports.loop = function (creep) {
                     creep.memory.targetId = null;
                 }
                 /*else if (moveResult == OK) {
-                 var look = creep.pos.lookFor(LOOK_STRUCTURES);
-                 // console.log("looking at " +JSON.stringify(look[0]))
-                 if (!(look.length > 0 && look[0].structureType && look[0].structureType == 'road')) {
-                 // console.log("New road for transporter");
-                 creep.room.createConstructionSite(creep.pos, STRUCTURE_ROAD);
-                 }
-                 }*/
+                    var look = creep.pos.lookFor(LOOK_STRUCTURES);
+                    // console.log("looking at " +JSON.stringify(look[0]))
+                    if (!(look.length > 0 && look[0].structureType && look[0].structureType == 'road')) {
+                        // console.log("New road for transporter");
+                        creep.room.createConstructionSite(creep.pos, STRUCTURE_ROAD);
+                    }
+                }*/
             }
+
+            // If other error, find new closest source
+            else if (result != OK) {
+                creep.memory.sourceId = null;
+                creep.memory.targetId = null;
+            }
+
+            // If withdrawed successfully, recalculate closest target
             else {
                 creep.memory.targetId = null;
             }
@@ -96,15 +100,31 @@ module.exports.loop = function (creep) {
                     creep.memory.targetId = null;
                 }
                 /*else if (moveResult == OK) {
-                 var look = creep.pos.lookFor(LOOK_STRUCTURES);
-                 // console.log("looking at " +JSON.stringify(look[0]))
-                 if (!(look.length > 0 && look[0].structureType && look[0].structureType == 'road')) {
-                 // console.log("New road for transporter");
-                 creep.room.createConstructionSite(creep.pos, STRUCTURE_ROAD);
-                 }
-                 }*/
+                    var look = creep.pos.lookFor(LOOK_STRUCTURES);
+                    // console.log("looking at " +JSON.stringify(look[0]))
+                    if (!(look.length > 0 && look[0].structureType && look[0].structureType == 'road')) {
+                        // console.log("New road for transporter");
+                        creep.room.createConstructionSite(creep.pos, STRUCTURE_ROAD);
+                    }
+                }*/
             }
+
+            // If target is fully loaded, find new closest target
+            else if (result == ERR_FULL) {
+                creep.memory.targetId = null;
+                creep.memory.sourceId = null;
+            }
+
+            // If other error, activate fallback role
+            else if (result != OK) {
+                console.log("ERROR while transfering: " + result + " (" + creep.name + ") at " + target.id + ": " + result);
+                creep.memory.targetId = null;
+                creep.memory.sourceId = null;
+            }
+
+            // If transfered successfully, reset source and target
             else {
+                creep.memory.targetId = null;
                 creep.memory.sourceId = null;
             }
         }
@@ -113,23 +133,11 @@ module.exports.loop = function (creep) {
 };
 
 var findClosestSource = function (creep) {
-    var source = creep.pos.findClosestByPath(FIND_DROPPED_ENERGY, {
-        filter: function (source) {
-            return (source.amount > 100);
+    var source = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+        filter: function(source) {
+            return (source.structureType == STRUCTURE_CONTAINER && source.store[RESOURCE_ENERGY] > 50);
         }
     });
-    if (!source) {
-        var containers = creep.room.find(FIND_STRUCTURES, {
-            filter: function (structure) {
-                return (structure.structureType == STRUCTURE_CONTAINER && structure.store[RESOURCE_ENERGY] > creep.carryCapacity &&
-                structure.id != creep.memory.targetId)
-            }
-        });
-        for (var i in containers) {
-            if (!source || source.store[RESOURCE_ENERGY] < containers[i].store[RESOURCE_ENERGY])
-                source = containers[i];
-        }
-    }
     if (!source) {
         console.log("No transporter source found for " + creep.name);
     }
@@ -139,15 +147,13 @@ module.exports.findClosestSource = findClosestSource;
 
 var findClosestTarget = function (creep) {
 
-    // Prio 1: Container in room near controller
-    var target = creep.room.controller.pos.findClosestByRange(FIND_STRUCTURES, {
+    // Prio 1: Towers
+    var target = creep.pos.findClosestByRange(FIND_MY_STRUCTURES, {
         filter: function (structure) {
-            return (structure.structureType == STRUCTURE_CONTAINER);
+            return ((structure.structureType == STRUCTURE_TOWER) &&
+            structure.energy < (structure.energyCapacity / 1.1));
         }
     });
-    if (target && target.store[RESOURCE_ENERGY] > (target.storeCapacity / 1.1))
-        target = null;
-
 
     // Prio 2: Spawn and extensions
     if (!target) {
@@ -159,18 +165,8 @@ var findClosestTarget = function (creep) {
         });
     }
 
-    // Prio 3: Towers
     if (!target) {
-        target = creep.pos.findClosestByRange(FIND_MY_STRUCTURES, {
-            filter: function (structure) {
-                return ((structure.structureType == STRUCTURE_TOWER) &&
-                structure.energy < structure.energyCapacity);
-            }
-        });
-    }
-
-    if (!target) {
-        console.log("No transporter container target found for " + creep.name);
+        console.log("No transporter container target container found for " + creep.name);
     }
     return target;
 };

@@ -1,5 +1,6 @@
 var roles = {
     transporter: 'transporter',
+    recharger: 'recharger',
     harvester: 'harvester',
     upgrader: 'upgrader',
     maintainer: 'maintainer',
@@ -12,19 +13,26 @@ var roles = {
 
 var population = {
     transporter: {
-        body: [ //[MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY],
-            [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY],
-            [MOVE, MOVE, CARRY, CARRY, CARRY, CARRY],
-            [MOVE, CARRY, CARRY]],
+        body: [ [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY],
+            [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY]
+        ],
         amount: 3,
         memory: {
             role: roles.transporter
         }
     },
+    recharger: {
+        body: [ //[MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY],
+            [MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY],
+            [MOVE, MOVE, CARRY, CARRY, CARRY, CARRY]
+        ],
+        amount: 1,
+        memory: {
+            role: roles.recharger
+        }
+    },
     harvester: {
         body: [[MOVE, CARRY, WORK, WORK, WORK, WORK, WORK, WORK]
-            // [MOVE, CARRY, WORK, WORK, WORK, WORK],
-            // [MOVE, CARRY, WORK, WORK]
             ],
         amount: 2,
         memory: {
@@ -32,11 +40,11 @@ var population = {
         }
     },
     upgrader: {
-        body: [[MOVE, MOVE, MOVE, CARRY, WORK, WORK, WORK, WORK, WORK, WORK],
-            [MOVE, MOVE, MOVE, CARRY, WORK, WORK, WORK, WORK],
-            // [MOVE, CARRY, WORK, WORK]
-            ],
-        amount: 2,
+        body: [[MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK]
+                // [MOVE, MOVE, MOVE, CARRY, WORK, WORK, WORK, WORK, WORK, WORK],
+                // [MOVE, MOVE, MOVE, CARRY, WORK, WORK, WORK, WORK]
+             ],
+        amount: 3,
         memory: {
             role: roles.upgrader
         }
@@ -52,49 +60,50 @@ var population = {
         fallbackRole: roles.upgrader
     },
     claimer: {
-        body: [[MOVE, MOVE, CLAIM, CLAIM], [MOVE, CLAIM]],
+        body: [[MOVE, MOVE, CLAIM, CLAIM]
+            ],
         memory: {
             role: roles.claimer
         },
-        rooms: {'W21S71': 1, 'W21S72': 0}
+        rooms: {'W21S71': 1, 'W21S72': 1}
     },
     expansionHarvester: {
         body: [[MOVE, MOVE, MOVE, MOVE, CARRY, WORK, WORK, WORK, WORK, WORK, WORK]
-            // [MOVE, MOVE, MOVE, CARRY, WORK, WORK, WORK, WORK],
-            // [MOVE, CARRY, WORK, WORK]
-            ],
+        ],
         memory: {
             role: roles.expansionHarvester
         },
-        rooms: {'W21S71': 1, 'W21S72': 0}
+        rooms: {'W21S71': 1, 'W21S72': 2}
     },
     expansionTransporter: {
-        body: [ //[MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY],
-            [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY],
-            [MOVE, MOVE, CARRY, CARRY, CARRY, CARRY]],
+        body: [ [MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY],
+            [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY]
+        ],
         memory: {
             role: roles.expansionTransporter
         },
-        rooms: {'W21S71': 1, 'W21S72': 0}
+        rooms: {'W21S71': 1, 'W21S72': 4}
     },
     expansionMaintainer: {
         body: [[MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, WORK, WORK, WORK, WORK],
             [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, WORK, WORK, WORK],
-            [MOVE, CARRY, WORK, WORK]],
+            [MOVE, CARRY, WORK, WORK]
+        ],
         memory: {
             role: roles.expansionMaintainer
         },
-        rooms: {'W21S71': 1, 'W21S72': 0}
+        rooms: {'W21S71': 0, 'W21S72': 0}
     },
     soldierMelee: {
         body: [ //[MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK],
             //[MOVE, MOVE, MOVE, MOVE, ATTACK, ATTACK, ATTACK, ATTACK],
-            [MOVE, ATTACK, ATTACK]],
+            [MOVE, ATTACK, ATTACK]
+        ],
         amount: 0,
         memory: {
             role: roles.soldierMelee
         },
-        rooms: {'W21S71': 0, 'W21S72': 0}
+        rooms: {'W21S71': 0, 'W21S72': 0, 'W23S71': 0}
     }
 };
 

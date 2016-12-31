@@ -6,7 +6,7 @@ module.exports.loop = function (creep) {
     /**
      * If creep carries energy, go unload it at closest target
      */
-    if (creep.carry.energy > 0) {
+    if (creep.carry.energy > (creep.carryCapacity / 2)) {
         var target;
         if (!creep.memory.targetId) {
             target = findClosestTarget(creep);
@@ -61,7 +61,7 @@ module.exports.loop = function (creep) {
 
             // If unloaded successfully, recalculate closest source
             else {
-                creep.memory.sourceId = null;
+                creep.memory.targetId = null;
             }
         }
 
@@ -110,7 +110,7 @@ module.exports.loop = function (creep) {
 
             // If harvested successfully and storage is full, recalculate nearest target
             else if (creep.carry.energy == creep.carryCapacity) {
-                creep.memory.targetId = null;
+                creep.memory.sourceId = null;
             }
         }
     }
@@ -123,12 +123,15 @@ var findClosestSource = function (creep) {
         creep.moveTo(new RoomPosition(25, 25, creep.memory.claimRoom));
     }
     else {
-        source = creep.pos.findClosestByRange(FIND_STRUCTURES, {
+        var containers = creep.room.find(FIND_STRUCTURES, {
             filter: function (structure) {
-                return (structure.structureType == STRUCTURE_CONTAINER &&
-                structure.store[RESOURCE_ENERGY] > 0);
+                return (structure.structureType == STRUCTURE_CONTAINER && structure.store[RESOURCE_ENERGY] > 0)
             }
         });
+        for (var i in containers) {
+            if (!source || source.store[RESOURCE_ENERGY] < containers[i].store[RESOURCE_ENERGY])
+                source = containers[i];
+        }
         if (!source) {
             console.log("No transporter container source found for " + creep.name);
         }
@@ -143,10 +146,9 @@ var findClosestTarget = function (creep) {
         creep.moveTo(new RoomPosition(25, 25, creep.memory.homeRoom));
     }
     else {
-        target = creep.pos.findClosestByRange(FIND_STRUCTURES, {
+        target = creep.pos.findClosestByPath(FIND_STRUCTURES, {
             filter: function (structure) {
-                return ((structure.structureType == STRUCTURE_CONTAINER) &&
-                structure.store[RESOURCE_ENERGY] < structure.storeCapacity);
+                return (structure.structureType == STRUCTURE_CONTAINER);
             }
         });
         if (!target) {

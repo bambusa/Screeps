@@ -81,7 +81,7 @@ module.exports.loop = function (creep) {
             var result;
             if (target.progressTotal)
                 result = creep.build(target);
-            else if (target.hits < target.hitsMax / 2)
+            else if (target.hits < (target.hitsMax / 2) || (target.hits < target.hitsMax && target.store[RESOURCE_ENERGY] == target.storeCapacity))
                 result = creep.repair(target);
             else
                 result = creep.transfer(target, RESOURCE_ENERGY);
@@ -129,11 +129,11 @@ var findClosestSource = function (creep) {
         for (var id in sources) {
             var thisSource = sources[id];
             var harvestersAround = thisSource.pos.findInRange(FIND_MY_CREEPS, 1, {
-                filter: function (creep) {
-                    return (creep.memory.role == configs.roles.harvester);
+                filter: function(creep) {
+                    return (creep.memory.role == configs.roles.expansionHarvester);
                 }
-            })
-            if (!harvestersAround.length) {
+            });
+            if (!harvestersAround.length || harvestersAround[0].id == creep.id) {
                 source = thisSource;
                 break;
             }
@@ -153,18 +153,17 @@ var findClosestTarget = function (creep) {
             return (structure.hits < (structure.hitsMax / 2));
         }
     });*/
-    /*if (!target) {
+    if (!target) {
         target = creep.pos.findClosestByRange(FIND_CONSTRUCTION_SITES, {
             filter: function (source) {
-                return (source.structureType == STRUCTURE_CONTAINER || source.structureType == STRUCTURE_ROAD);
+                return (source.structureType == STRUCTURE_CONTAINER); // || source.structureType == STRUCTURE_ROAD
             }
         });
-    }*/
+    }
     if (!target) {
         target = creep.pos.findClosestByRange(FIND_STRUCTURES, {
             filter: function (structure) {
-                return (structure.structureType == STRUCTURE_CONTAINER &&
-                structure.store[RESOURCE_ENERGY] < structure.storeCapacity);
+                return (structure.structureType == STRUCTURE_CONTAINER);
             }
         });
     }

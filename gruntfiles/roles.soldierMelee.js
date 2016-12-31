@@ -19,18 +19,19 @@ module.exports.loop = function (creep) {
             creep.say(sentence[index], true);
 
             var target = findClosestHostileCreep(creep);
-            if (!target)
+            if (!target && !Game.rooms[creep.room.name])
                 target = findClosestWall(creep);
             if (!target)
                 target = findClosestHostileStructures(creep);
             if (target) {
-                if (creep.attack(target) == ERR_NOT_IN_RANGE) {
+                var result = creep.attack(target);
+                if (result == ERR_NOT_IN_RANGE) {
                     creep.moveTo(target);
                 }
+                else {
+                    creep.moveTo(new RoomPosition(35, 12, targetRoom));
+                }
             }
-            else {
-             // console.log("ERROR nothing to attack for " + creep.name);
-             }
         }
     }
 };

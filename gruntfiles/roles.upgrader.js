@@ -2,41 +2,9 @@
 module.exports.loop = function (creep) {
 
     /**
-     * If creep carries energy, upgrade or go to closest target
-     */
-    if (creep.carry.energy > 0) {
-        // console.log("upgrading: " + creep.name);
-        var target = creep.room.controller;
-        if (!target) {
-            console.log("Found no controller in room for: " + creep.name);
-        }
-
-        // Upgrade or move to target
-        if (target) {
-            var result = creep.upgradeController(target);
-
-            // If not in range, move to target
-            if (result == ERR_NOT_IN_RANGE) {
-                creep.moveTo(target);
-            }
-
-            // If other error, log it and move to parking position
-            else if (result != OK) {
-                console.log("ERROR while upgrading: " + result + " (" + creep.name + ") at " + target.id + ": " + result);
-                creep.memory.targetId = null;
-            }
-
-            // If upgraded successfully and storage is empty, recalculate nearest source
-            else {
-                creep.memory.sourceId = null;
-            }
-        }
-    }
-
-    /**
      * If creep isn't carrying any energy, collect some at closest container
      */
-    else if (creep.carry.energy < creep.carryCapacity) {
+    if (creep.carry.energy == 0) {
         // console.log("collecting: " + creep.name);
 
         // No source in memory
@@ -72,6 +40,38 @@ module.exports.loop = function (creep) {
 
             // If other error, find new closest source
             else if (result != OK) {
+                creep.memory.sourceId = null;
+            }
+        }
+    }
+
+    /**
+     * If creep carries energy, upgrade or go to closest target
+     */
+    if (creep.carry.energy > 0) {
+        // console.log("upgrading: " + creep.name);
+        var target = creep.room.controller;
+        if (!target) {
+            console.log("Found no controller in room for: " + creep.name);
+        }
+
+        // Upgrade or move to target
+        if (target) {
+            var result = creep.upgradeController(target);
+
+            // If not in range, move to target
+            if (result == ERR_NOT_IN_RANGE) {
+                creep.moveTo(target);
+            }
+
+            // If other error, log it and move to parking position
+            else if (result != OK) {
+                console.log("ERROR while upgrading: " + result + " (" + creep.name + ") at " + target.id + ": " + result);
+                creep.memory.targetId = null;
+            }
+
+            // If upgraded successfully and storage is empty, recalculate nearest source
+            else {
                 creep.memory.sourceId = null;
             }
         }

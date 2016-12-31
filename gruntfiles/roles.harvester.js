@@ -123,7 +123,7 @@ var findClosestSource = function (creep) {
                 return (creep.memory.role == configs.roles.harvester);
             }
         })
-        if (!harvestersAround.length) {
+        if (!harvestersAround.length || harvestersAround[0].id == creep.id) {
             var source = thisSource;
             break;
         }

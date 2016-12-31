@@ -26,31 +26,35 @@ module.exports.loop = function (creep) {
     // console.log(creep.carry.energy == 0)
     // console.log(creep.carry.energy < creep.carryCapacity && creep.pos.isNearTo(source))
     if (creep.carry.energy == 0) {
+        if (source) {
+            // Harvest or move to source
+            var result;
+            if (source.store)
+                result = creep.withdraw(source, RESOURCE_ENERGY);
+            else
+                result = creep.pickup(source);
 
-        // Harvest or move to source
-        var result = creep.withdraw(source, RESOURCE_ENERGY);
+            // If not in range, move to source
+            if (result == ERR_NOT_IN_RANGE) {
 
-        // If not in range, move to source
-        if (result == ERR_NOT_IN_RANGE) {
+                // If path to source is blocked, find new closest source
+                if (creep.moveTo(source) == ERR_NO_PATH) {
+                    creep.memory.sourceId = null;
+                    creep.memory.targetId = null;
+                }
+            }
 
-            // If path to source is blocked, find new closest source
-            if (creep.moveTo(source) == ERR_NO_PATH) {
+            // If other error, find new closest source
+            else if (result != OK) {
                 creep.memory.sourceId = null;
                 creep.memory.targetId = null;
             }
-        }
 
-        // If other error, find new closest source
-        else if (result != OK) {
-            creep.memory.sourceId = null;
-            creep.memory.targetId = null;
+            // If harvested successfully and storage is full, recalculate nearest target
+            else {
+                creep.memory.targetId = null;
+            }
         }
-
-        // If harvested successfully and storage is full, recalculate nearest target
-        else {
-            creep.memory.targetId = null;
-        }
-
     }
 
     /**
@@ -123,12 +127,15 @@ var findClosestSource = function (creep) {
         creep.moveTo(new RoomPosition(25, 25, creep.memory.claimRoom));
     }
     else {
-        source = creep.pos.findClosestByRange(FIND_STRUCTURES, {
-            filter: function (structure) {
-                return (structure.structureType == STRUCTURE_CONTAINER &&
-                structure.store[RESOURCE_ENERGY] > 0);
-            }
-        });
+        source = creep.pos.findClosestByRange(FIND_DROPPED_ENERGY);
+        if (!source) {
+            source = creep.pos.findClosestByRange(FIND_STRUCTURES, {
+                filter: function (structure) {
+                    return (structure.structureType == STRUCTURE_CONTAINER &&
+                    structure.store[RESOURCE_ENERGY] > 0);
+                }
+            });
+        }
         if (!source) {
             console.log("No transporter container source found for " + creep.name);
         }
@@ -144,7 +151,11 @@ var findClosestTarget = function (creep) {
         }
     });
     if (!target) {
-        target = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
+        target = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES, {
+            filter: function (c) {
+                return (c.owner.username == 'HerrLehmann');
+            }
+        });
     }
     if (!target) {
         target = creep.pos.findClosestByRange(FIND_STRUCTURES, {
