@@ -48,10 +48,10 @@ var population = {
     upgrader: {
         body: [
             [MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK],
-            // [MOVE, MOVE, MOVE, CARRY, WORK, WORK, WORK, WORK, WORK, WORK],
+            [MOVE, MOVE, MOVE, CARRY, WORK, WORK, WORK, WORK, WORK, WORK],
             // [MOVE, MOVE, MOVE, CARRY, WORK, WORK, WORK, WORK]
         ],
-        amount: 2,
+        amount: 3,
         memory: {
             role: roles.upgrader
         }
@@ -94,7 +94,7 @@ var population = {
         memory: {
             role: roles.expansionTransporter
         },
-        rooms: {'W21S71': 1, 'W21S72': 3}
+        rooms: {'W21S71': 1, 'W21S72': 4}
     },
     expansionMaintainer: {
         body: [
@@ -105,7 +105,7 @@ var population = {
         memory: {
             role: roles.expansionMaintainer
         },
-        rooms: {'W21S71': 1, 'W21S72': 1}
+        rooms: {'W21S71': 0, 'W21S72': 0}
     },
     soldierMelee: {
         body: [
