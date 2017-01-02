@@ -109,6 +109,7 @@ module.exports.loop = function (creep) {
             // If withdrawed successfully, recalculate closest target
             else {
                 creep.memory.targetId = null;
+                creep.memory.sourceId = null;
             }
         }
     }
@@ -117,7 +118,7 @@ module.exports.loop = function (creep) {
 var findClosestSource = function (creep) {
     var source = creep.pos.findClosestByPath(FIND_STRUCTURES, {
         filter: function (structure) {
-            return (structure.structureType == STRUCTURE_CONTAINER && structure.store[RESOURCE_ENERGY] > 500);
+            return (structure.structureType == STRUCTURE_CONTAINER && structure.store && structure.store[RESOURCE_ENERGY] > creep.carryCapacity);
         }
     });
     if (!source) {
@@ -130,7 +131,7 @@ module.exports.findClosestSource = findClosestSource;
 var findClosestTarget = function (creep) {
 
     // Prio 1: Weak structures, that need maintenance
-    var target = creep.pos.findClosestByRange(FIND_STRUCTURES, {
+    var target = creep.pos.findClosestByPath(FIND_STRUCTURES, {
         filter: function (structure) {
             return (structure.hits <= 5000 && structure.hits < (structure.hitsMax / 2));
         }
@@ -138,7 +139,7 @@ var findClosestTarget = function (creep) {
 
     // Prio 2: Important construction sites
     if (!target) {
-        target = creep.pos.findClosestByRange(FIND_CONSTRUCTION_SITES, {
+        target = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES, {
             filter: function (structure) {
                 return (structure.structureType == STRUCTURE_EXTENSION);
             }
@@ -147,7 +148,7 @@ var findClosestTarget = function (creep) {
 
     // Prio 3: Other construction sites
     if (!target) {
-        target = creep.pos.findClosestByRange(FIND_CONSTRUCTION_SITES);
+        target = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
     }
 
     // Prio 4: Structures like walls etc. below 150k hits
@@ -169,7 +170,7 @@ var findClosestTarget = function (creep) {
     }
 
     if (!target) {
-        console.log("No repairer target found for " + creep.name);
+        console.log("No target found for " + creep.name);
     }
     return target;
 };

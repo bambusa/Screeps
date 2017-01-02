@@ -9,8 +9,9 @@ var claimer = require("roles.claimer");
 var expansionHarvester = require("roles.expansionHarvester");
 var expansionTransporter = require("roles.expansionTransporter");
 var expansionMaintainer = require("roles.expansionMaintainer");
-var tower = require("roles.tower");
 var soldierMelee = require("roles.soldierMelee");
+var tower = require("roles.tower");
+var link = require("roles.link");
 
 module.exports.loop = function () {
     // Count creeps for roles
@@ -106,8 +107,6 @@ module.exports.loop = function () {
         }
     }
 
-    population.loop(populationCount);
-
     /**
      * Towers
      */
@@ -131,4 +130,11 @@ module.exports.loop = function () {
             console.log("Need " + enemies.length + " soldiers in " + name);
         configs.population.soldierMelee.rooms[name] = enemies.length;
     }
+
+    /**
+     * Links
+     */
+    link.loop();
+
+    population.loop(populationCount);
 };

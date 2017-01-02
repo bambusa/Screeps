@@ -45,7 +45,7 @@ var findClosestTarget = function (tower) {
     }
 
     // Prio 3: Damaged structures
-    if (!target && tower.energy > (tower.energyCapacity / 2)) {
+    if (!target && tower.energy > (tower.energyCapacity / 1.2)) {
         target = tower.pos.findClosestByRange(FIND_STRUCTURES, {
             filter: function (structure) {
                 return (structure.hits <= 5000 && structure.hits < structure.hitsMax / 2);

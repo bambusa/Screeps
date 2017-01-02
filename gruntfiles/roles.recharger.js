@@ -135,11 +135,11 @@ module.exports.loop = function (creep) {
 var findClosestSource = function (creep) {
     var source = creep.pos.findClosestByPath(FIND_STRUCTURES, {
         filter: function(source) {
-            return (source.structureType == STRUCTURE_CONTAINER && source.store[RESOURCE_ENERGY] > 50);
+            return (source.structureType == STRUCTURE_CONTAINER && source.store && source.store[RESOURCE_ENERGY] >= 50);
         }
     });
     if (!source) {
-        console.log("No transporter source found for " + creep.name);
+        console.log("No source found for " + creep.name);
     }
     return source;
 };
@@ -157,7 +157,7 @@ var findClosestTarget = function (creep) {
 
     // Prio 2: Spawn and extensions
     if (!target) {
-        target = creep.pos.findClosestByRange(FIND_MY_STRUCTURES, {
+        target = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
             filter: function (structure) {
                 return ((structure.structureType == STRUCTURE_SPAWN || structure.structureType == STRUCTURE_EXTENSION) &&
                 structure.energy < structure.energyCapacity);
@@ -166,7 +166,7 @@ var findClosestTarget = function (creep) {
     }
 
     if (!target) {
-        console.log("No transporter container target container found for " + creep.name);
+        console.log("No target found for " + creep.name);
     }
     return target;
 };

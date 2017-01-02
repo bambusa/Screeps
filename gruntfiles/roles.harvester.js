@@ -49,7 +49,7 @@ module.exports.loop = function (creep) {
 
             // If harvested successfully and storage is full, recalculate nearest target
             else if (creep.carry.energy == creep.carryCapacity) {
-                creep.memory.targetId = null;
+                // creep.memory.targetId = null;
             }
         }
     }
@@ -122,14 +122,14 @@ var findClosestSource = function (creep) {
             filter: function(creep) {
                 return (creep.memory.role == configs.roles.harvester);
             }
-        })
+        });
         if (!harvestersAround.length || harvestersAround[0].id == creep.id) {
-            var source = thisSource;
+            source = thisSource;
             break;
         }
     }
     if (!source) {
-        console.log("No harvester source found for " + creep.name);
+        console.log("No source found for " + creep.name);
     }
     return source;
 };
@@ -138,11 +138,11 @@ module.exports.findClosestSource = findClosestSource;
 var findClosestTarget = function (creep) {
     var target = creep.pos.findClosestByPath(FIND_STRUCTURES, {
         filter: function (structure) {
-            return (structure.structureType == STRUCTURE_CONTAINER && structure.store[RESOURCE_ENERGY] < structure.storeCapacity);
+            return (structure.structureType == STRUCTURE_CONTAINER && (!structure.store || structure.store[RESOURCE_ENERGY] < structure.storeCapacity));
         }
     });
     if (!target) {
-        console.log("No harvester target container found for " + creep.name);
+        console.log("No target found for " + creep.name);
     }
     return target;
 };

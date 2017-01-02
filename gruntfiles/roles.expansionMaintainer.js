@@ -129,15 +129,15 @@ var findClosestSource = function (creep) {
     else {
         source = creep.pos.findClosestByRange(FIND_DROPPED_ENERGY);
         if (!source) {
-            source = creep.pos.findClosestByRange(FIND_STRUCTURES, {
+            source = creep.pos.findClosestByPath(FIND_STRUCTURES, {
                 filter: function (structure) {
                     return (structure.structureType == STRUCTURE_CONTAINER &&
-                    structure.store[RESOURCE_ENERGY] > 0);
+                        structure.store && structure.store[RESOURCE_ENERGY] > 0);
                 }
             });
         }
         if (!source) {
-            console.log("No transporter container source found for " + creep.name);
+            console.log("No source found for " + creep.name);
         }
     }
     return source;
@@ -145,7 +145,7 @@ var findClosestSource = function (creep) {
 module.exports.findClosestSource = findClosestSource;
 
 var findClosestTarget = function (creep) {
-    var target = creep.pos.findClosestByRange(FIND_STRUCTURES, {
+    var target = creep.pos.findClosestByPath(FIND_STRUCTURES, {
         filter: function (structure) {
             return (structure.hits < (structure.hitsMax / 2));
         }
@@ -165,7 +165,7 @@ var findClosestTarget = function (creep) {
         });
     }
     if (!target) {
-        console.log("No maintainer target container found for " + creep.name);
+        console.log("No target found for " + creep.name);
     }
     return target;
 };

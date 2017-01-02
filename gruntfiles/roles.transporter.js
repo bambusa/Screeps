@@ -13,7 +13,7 @@ module.exports.loop = function (creep) {
 
             // No source available at the moment
             if (!source) {
-                creep.say("No source");
+                // creep.say("No source");
             }
             else creep.memory.sourceId = source.id
         }
@@ -113,7 +113,7 @@ module.exports.loop = function (creep) {
 };
 
 var findClosestSource = function (creep) {
-    var source = creep.pos.findClosestByPath(FIND_DROPPED_ENERGY, {
+    var source = creep.pos.findClosestByRange(FIND_DROPPED_ENERGY, {
         filter: function (source) {
             return (source.amount > 100);
         }
@@ -121,7 +121,7 @@ var findClosestSource = function (creep) {
     if (!source) {
         var containers = creep.room.find(FIND_STRUCTURES, {
             filter: function (structure) {
-                return (structure.structureType == STRUCTURE_CONTAINER && structure.store[RESOURCE_ENERGY] > creep.carryCapacity &&
+                return (structure.structureType == STRUCTURE_CONTAINER && structure.store[RESOURCE_ENERGY] && structure.store[RESOURCE_ENERGY] > creep.carryCapacity &&
                 structure.id != creep.memory.targetId)
             }
         });
@@ -131,7 +131,7 @@ var findClosestSource = function (creep) {
         }
     }
     if (!source) {
-        console.log("No transporter source found for " + creep.name);
+        console.log("No source found for " + creep.name);
     }
     return source;
 };
@@ -139,17 +139,27 @@ module.exports.findClosestSource = findClosestSource;
 
 var findClosestTarget = function (creep) {
 
-    // Prio 1: Container in room near controller
-    var target = creep.room.controller.pos.findClosestByRange(FIND_STRUCTURES, {
+    // Prio 1: Link to controller
+    var target = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
         filter: function (structure) {
-            return (structure.structureType == STRUCTURE_CONTAINER);
+            return (structure.structureType == STRUCTURE_LINK && structure.energy < (structure.energyCapacity / 1.1));
         }
     });
-    if (target && target.store[RESOURCE_ENERGY] > (target.storeCapacity / 1.1))
+    if (target && target.pos.inRangeTo(creep.room.controller, 2))
         target = null;
 
+    // Prio 2: Container in room near controller
+    if (!target) {
+        target = creep.room.controller.pos.findClosestByRange(FIND_STRUCTURES, {
+            filter: function (structure) {
+                return (structure.structureType == STRUCTURE_CONTAINER || structure.structureType == STRUCTURE_LINK);
+            }
+        });
+        if (target && (!target.store || target.store[RESOURCE_ENERGY] < (target.storeCapacity / 1.1)))
+            target = null;
+    }
 
-    // Prio 2: Spawn and extensions
+    // Prio 3: Spawn and extensions
     if (!target) {
         target = creep.pos.findClosestByRange(FIND_MY_STRUCTURES, {
             filter: function (structure) {
@@ -159,7 +169,7 @@ var findClosestTarget = function (creep) {
         });
     }
 
-    // Prio 3: Towers
+    // Prio 4: Towers
     if (!target) {
         target = creep.pos.findClosestByRange(FIND_MY_STRUCTURES, {
             filter: function (structure) {
@@ -169,8 +179,18 @@ var findClosestTarget = function (creep) {
         });
     }
 
+    // Prio 5: Storage
     if (!target) {
-        console.log("No transporter container target found for " + creep.name);
+        target = creep.pos.findClosestByRange(FIND_MY_STRUCTURES, {
+            filter: function (structure) {
+                return ((structure.structureType == STRUCTURE_STORAGE) &&
+                (!structure.store[RESOURCE_ENERGY] || structure.store[RESOURCE_ENERGY] < structure.storeCapacity));
+            }
+        });
+    }
+
+    if (!target) {
+        console.log("No target found for " + creep.name);
     }
     return target;
 };

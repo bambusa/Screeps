@@ -81,7 +81,7 @@ module.exports.loop = function (creep) {
             var result;
             if (target.progressTotal)
                 result = creep.build(target);
-            else if (target.hits < (target.hitsMax / 2) || (target.hits < target.hitsMax && target.store[RESOURCE_ENERGY] == target.storeCapacity))
+            else if (target.hits < (target.hitsMax / 2) || (target.hits < target.hitsMax && target.store && target.store[RESOURCE_ENERGY] == target.storeCapacity))
                 result = creep.repair(target);
             else
                 result = creep.transfer(target, RESOURCE_ENERGY);
@@ -139,7 +139,7 @@ var findClosestSource = function (creep) {
             }
         }
         if (!source) {
-            console.log("No harvester source found for " + creep.name);
+            console.log("No source found for " + creep.name);
         }
     }
     return source;
@@ -168,7 +168,7 @@ var findClosestTarget = function (creep) {
         });
     }
     if (!target) {
-        console.log("No harvester target container found for " + creep.name);
+        console.log("No target found for " + creep.name);
     }
     return target;
 };

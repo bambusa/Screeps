@@ -79,13 +79,25 @@ module.exports.loop = function (creep) {
 };
 
 var findClosestSource = function (creep) {
-    var source = creep.room.controller.pos.findClosestByPath(FIND_STRUCTURES, {
+    var source = creep.room.controller.pos.findClosestByRange(FIND_MY_STRUCTURES, {
         filter: function (structure) {
-            return (structure.structureType == STRUCTURE_CONTAINER);
+            return (structure.structureType == STRUCTURE_LINK);
         }
     });
+    if (source && source.energy == 0)
+        source = null;
+
     if (!source) {
-        console.log("No upgrader source found for " + creep.name);
+        source = creep.room.controller.pos.findClosestByRange(FIND_STRUCTURES, {
+            filter: function (structure) {
+                return (structure.structureType == STRUCTURE_CONTAINER);
+            }
+        });
+        if (source && (!source.store || source.store[RESOURCE_ENERGY] == 0))
+            source = null;
+    }
+    if (!source) {
+        console.log("No source found for " + creep.name);
     }
     return source;
 };
